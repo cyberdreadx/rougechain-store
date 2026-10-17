@@ -3,7 +3,9 @@
 //   a product with a Stripe Payment Link  ->  "Add to cart"; the cart's "Continue to payment" goes to Stripe
 //   none, but an email signup is set      ->  "Get notified" opens the signup form
 //   neither (a preview)                   ->  "Add to cart"; the cart says checkout isn't open yet
-// Wishlist, follows and the cart are kept in this browser only (localStorage).
+// Wishlist, follows and the cart are kept in this browser (localStorage). account.js adds sign-in:
+// while someone is signed in, their wishlist and follows are saved to their account too, and checkout
+// tells Stripe which account is buying.
 (function () {
   var S = window.STORE || {};
 
@@ -88,9 +90,18 @@
   var opened = null, opener = null;
   function open(panel, from) { if (opened) close(); opened = panel; opener = from || null; panel.hidden = false; scrim.hidden = false; panel.querySelector(".rc-x").focus(); }
   function close() { if (!opened) return; opened.hidden = true; scrim.hidden = true; opened = null; if (opener && opener.focus) opener.focus(); }
+  function mount(panel) {
+    shell.appendChild(panel);
+    panel.querySelectorAll(".rc-x").forEach(function (x) { x.addEventListener("click", close); });
+  }
   scrim.addEventListener("click", close);
   shell.querySelectorAll(".rc-x").forEach(function (x) { x.addEventListener("click", close); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && opened) close(); });
+
+  // ---- the wishlist and follow buttons repaint through these when the lists change
+  var painters = [];
+  function paintLists() { painters.forEach(function (p) { p(); }); paintCounts(); }
+  function listsChanged() { document.dispatchEvent(new CustomEvent("rc:lists")); }
 
   // ---- counts in the store bar
   function paintCounts() {
@@ -118,12 +129,23 @@
     if (!items.length) { pay.disabled = true; note.textContent = ""; }
     else if (!live) { pay.disabled = true; note.textContent = "Checkout isn't open yet. Until it is, keep things on your wishlist."; }
     else if (items.length > 1) { pay.disabled = true; note.textContent = "For now, buy one item at a time."; }
-    else { pay.disabled = false; note.textContent = "You pay on Stripe's secure checkout page."; }
+    else { pay.disabled = false; note.textContent = "You pay on Stripe's secure checkout page." + (window.RC && window.RC.account ? " The purchase is saved to your store account." : ""); }
   }
   function openCart(from) { paintCart(); open(cart, from); }
+  // Signed in: Stripe gets the account id (it shows as the payment's client reference ID) and the email.
+  function payUrl(id) {
+    var url = link(id), who = window.RC && window.RC.account;
+    if (!url || !who) return url;
+    try {
+      var u = new URL(url);
+      u.searchParams.set("client_reference_id", who.id);
+      if (who.email) u.searchParams.set("prefilled_email", who.email);
+      return u.toString();
+    } catch (e) { return url; }
+  }
   cart.querySelector(".rc-pay").addEventListener("click", function () {
     var items = read("rc-cart");
-    if (items.length === 1 && link(items[0])) window.location.href = link(items[0]);
+    if (items.length === 1 && link(items[0])) window.location.href = payUrl(items[0]);
   });
 
   // ---- signup, while a product isn't on sale
@@ -160,14 +182,14 @@
   document.querySelectorAll("[data-wish]").forEach(function (b) {
     var id = b.getAttribute("data-wish");
     function paint() { var on = has("rc-wish", id); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "♥ On your wishlist" : "♡ Add to wishlist"; }
-    b.addEventListener("click", function () { put("rc-wish", id, !has("rc-wish", id)); paint(); paintCounts(); });
-    paint();
+    b.addEventListener("click", function () { put("rc-wish", id, !has("rc-wish", id)); paint(); paintCounts(); listsChanged(); });
+    painters.push(paint); paint();
   });
   document.querySelectorAll("[data-follow]").forEach(function (b) {
     var id = b.getAttribute("data-follow");
     function paint() { var on = has("rc-follow", id); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "Following" : "Follow"; }
-    b.addEventListener("click", function () { put("rc-follow", id, !has("rc-follow", id)); paint(); });
-    paint();
+    b.addEventListener("click", function () { put("rc-follow", id, !has("rc-follow", id)); paint(); listsChanged(); });
+    painters.push(paint); paint();
   });
   var cartTop = document.getElementById("cart-top");
   if (cartTop) cartTop.addEventListener("click", function (e) { openCart(e.currentTarget); });
@@ -185,5 +207,13 @@
   });
 
   paintCounts();
-  window.RC = { products: PRODUCTS, mode: mode, openCart: openCart, clearCart: function () { write("rc-cart", []); paintCounts(); } };
+  window.RC = {
+    products: PRODUCTS, mode: mode, openCart: openCart,
+    clearCart: function () { write("rc-cart", []); paintCounts(); },
+    // for account.js
+    account: null,
+    panel: { mount: mount, open: open, close: close },
+    lists: function () { return { wishlist: read("rc-wish"), follows: read("rc-follow") }; },
+    setLists: function (l) { write("rc-wish", l.wishlist || []); write("rc-follow", l.follows || []); paintLists(); }
+  };
 })();

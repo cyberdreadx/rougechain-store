@@ -1,7 +1,8 @@
 # RougeChain Store
 
-The store site for store.rougechain.io: the homepage and the Gltch Runner page. It's a plain static site
-with no server and no build step. Put the `public` folder online as it is.
+The store site for store.rougechain.io: the homepage and the Gltch Runner page. The pages are plain
+static files with no build step. Accounts (sign in with email or a RougeChain wallet) run as one small
+Netlify Function beside them.
 
 ```
 public/
@@ -10,10 +11,17 @@ public/
   thanks.html         where Stripe sends a buyer after paying
   store-config.js     THE FILE YOU EDIT: Stripe links, email signup, contact, policy links
   store.js            prices, cart, checkout, wishlist (prices live in PRODUCTS at the top)
+  account.js          the Sign in button and account panel (email, password, RougeChain wallet)
   fonts/              the game's typefaces, served from the site itself (SIL Open Font License)
   img/                screenshots, weapon renders, the RougeChain logo
+netlify/
+  functions/api.mjs   the accounts API, served at /api/*
+  lib/accounts.mjs    its routes: email codes, passwords, Sign-In with RougeChain, linking, lists
+  lib/…               sessions and hashing, the Resend email, the Netlify Blobs store
+test/                 the API's tests (npm test)
 preview.py            makes a claude.ai preview page from public/index.html
-netlify.toml          tells Netlify to publish public/ (no build step)
+netlify.toml          tells Netlify to publish public/ and where the function is
+package.json          the function's two dependencies: @rougechain/sdk and @netlify/blobs
 ```
 
 The site has three states, and `store-config.js` picks which one shows:
@@ -26,14 +34,17 @@ The site has three states, and `store-config.js` picks which one shows:
 
 ## 1. Put it online at store.rougechain.io
 
-**Cloudflare Pages:**
-1. Dashboard > Workers & Pages > Create > Pages > Upload assets. Name the project (e.g. `rougechain-store`) and upload the `public` folder.
-2. In the project, open Custom domains and add `store.rougechain.io`.
-   - If rougechain.io's DNS is on Cloudflare, the record is added for you.
-   - If not, add a CNAME record at your DNS host: `store` pointing to `rougechain-store.pages.dev`.
-3. To update the site later, upload `public` again as a new deployment.
+store.rougechain.io is on Netlify. Deploy it from this GitHub repository, so the accounts function goes
+out with the pages. Dragging the `public` folder onto Netlify only publishes the pages; sign-in then
+stays hidden.
 
-Netlify works the same way: drop the `public` folder at app.netlify.com/drop, then add the domain and point a CNAME at the `.netlify.app` address it gives you.
+1. In Netlify, open the store's site > Site configuration > Build & deploy > Link repository, and pick
+   `cyberdreadx/rougechain-store`. Leave the build command empty: `netlify.toml` already says to
+   publish `public` and where the function is.
+2. Every push to `main` deploys. Pull requests get a deploy preview, where sign-in works too.
+
+To start a new site instead: Add new site > Import an existing project > GitHub, then add the domain
+`store.rougechain.io` and point a CNAME for `store` at the `.netlify.app` address it gives you.
 
 ## 2. Collect emails until it's on sale
 
@@ -72,3 +83,76 @@ The signup form says the address is only used for RougeChain releases. Set `priv
 - **On Stripe:** add a new price to the product and make a new Payment Link for it. Stripe charges whatever its link says.
 
 Nothing in `store-config.js` is secret: Payment Links are meant to be public. Never put a Stripe secret key in this site.
+
+## Accounts and sign-in
+
+**Sign in** sits in the store bar. There are two ways in, and both reach the same account once linked:
+
+- **Email.** A password, or a 6-digit code we email. The code also makes new accounts and resets
+  forgotten passwords, so there's no separate sign-up or reset page.
+- **RougeChain wallet.** The wallet signs a one-time *Sign-In with RougeChain* message with its
+  ML-DSA-65 key. Nothing goes on chain and no funds can move. The function checks it with
+  `verifySignIn` from `@rougechain/sdk`, following
+  [Wallet authentication](https://docs.rougechain.io/advanced/wallet-authentication): the nonce is
+  issued by the server and works once, the domain comes from configuration, the chain id is checked,
+  and the message expires after 10 minutes.
+
+While someone is signed in:
+
+- their wishlist and follows are saved to the account and follow them to other devices;
+- checkout adds `client_reference_id=<account id>` and `prefilled_email` to the Stripe Payment Link.
+  In Stripe, each payment's Checkout Session shows the account id as its **client reference ID**,
+  which is what a "My library" page can use later.
+
+From the account panel people can add an email to a wallet account (or the other way round), set or
+change a password, and remove either sign-in method as long as the other one stays.
+
+### Turn it on
+
+1. **Resend** (sends the code emails): make an account at resend.com, add the domain `rougechain.io`
+   under Domains and add the DNS records it shows, then create an API key with "Sending access".
+2. In Netlify > Site configuration > Environment variables, add:
+
+   | Variable | Value |
+   |---|---|
+   | `RESEND_API_KEY` | the Resend API key (`re_…`). Mark it as secret. |
+   | `AUTH_EMAIL_FROM` | who the emails come from, e.g. `RougeChain Store <login@rougechain.io>` (that is the default). The domain must be verified in Resend. |
+
+3. Deploy again. Until `RESEND_API_KEY` is set, the panel offers wallet sign-in only and says email
+   sign-in opens soon.
+
+Optional settings:
+
+| Variable | Default | What it does |
+|---|---|---|
+| `STORE_ORIGINS` | `https://store.rougechain.io` | The addresses the store is served from, comma-separated. Only these may use the API, and wallet messages name them. Deploy previews and `netlify dev` can always use their own address. |
+| `ROUGECHAIN_CHAIN_ID` | `rougechain-mainnet-1` | The network named in wallet sign-in messages (`rougechain-devnet-1` for testnet). |
+| `AUTH_SECRET` | made and kept in the store | A long random string used to hash email codes. Set it if you'd rather keep it outside the data. |
+
+**Wallet sign-in needs RougeChain Wallet 1.8 or later**, the first version with `signMessage`. The
+store checks for it and asks people with an older wallet to update. The Chrome Web Store had 1.6.0 on
+2026-10-17; publish the current extension (`apps/extension` in rougechain-node, 1.9.0) to turn wallet
+sign-in on for everyone.
+
+### Where the data lives
+
+Everything is in one Netlify Blobs store called `rc-auth` (Netlify > the site > Blobs). Deploy
+previews and `netlify dev` use a separate store, `rc-auth-preview`, so testing never touches real
+accounts. Passwords are
+hashed with scrypt, emailed codes are kept only as an HMAC, and sessions are kept as a hash of the
+token in the browser's cookie (`__Host-rc_session`, HttpOnly, 30 days). The layout of the keys is at
+the top of `netlify/lib/store.mjs`. No card details are ever here: Stripe handles payment.
+
+Built-in limits: a code works once for 10 minutes and allows 5 guesses; one code a minute and 6 an hour
+per address; 10 password tries per address per 15 minutes; per-visitor caps on everything else.
+
+### Working on it locally
+
+```
+npm install
+npx netlify-cli dev        # the site and the API at http://localhost:8888
+npm test                   # the API's tests: email, passwords, wallet signatures, linking, guards
+```
+
+Under `netlify dev` without `RESEND_API_KEY`, sign-in codes are printed in the terminal instead of
+emailed.

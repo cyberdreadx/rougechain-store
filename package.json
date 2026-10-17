@@ -1,0 +1,16 @@
+{
+  "name": "rougechain-store",
+  "private": true,
+  "type": "module",
+  "description": "store.rougechain.io: the static store in public/ and its accounts API in netlify/",
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.4",
+    "@rougechain/sdk": "1.15.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
