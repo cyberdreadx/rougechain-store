@@ -1,13 +1,17 @@
 // RougeChain Store accounts: the Sign in button in the store bar and its panel. Load it after store.js.
 // Two ways in, both to the same account once linked:
 //   Email               a password, or a 6-digit code we email (the code also makes new accounts and resets passwords)
-//   RougeChain wallet   the wallet signs a one-time Sign-In with RougeChain message (extension 1.8 or later)
+//   RougeChain wallet   the wallet signs a one-time Sign-In with RougeChain message: the browser extension
+//                       (1.8 or later) on a computer, or Qwalla's built-in browser on a phone or desktop.
+//                       A phone without a wallet gets an "Open in Qwalla" link (qwalla:// deep link).
 // The server half is netlify/functions/api.mjs (/api/*). Where there is no API, such as a static
 // preview, the Sign in button stays hidden and the store works as before.
 (function () {
   var RC = window.RC, bar = document.querySelector(".bar-right");
   if (!RC || !bar) return;
   var WALLET_URL = "https://chromewebstore.google.com/detail/rougechain-wallet/ilkbgjgphhaolfdjkfefdfiifipmhakj";
+  var QWALLA_URL = "https://qwalla.io";
+  var PHONE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
   var account = null, sentTo = "", resetting = false, emailOn = true;
 
   // ---- styles (the page's colours where it has them, like store.js)
@@ -26,6 +30,8 @@
     ".rc-code{font:400 22px/1 var(--mono,monospace)!important;letter-spacing:.3em}",
     ".rc-alt,.rc-hint{margin:0;font-size:13px;color:var(--muted,#9095a8)}",
     ".rc-hint a{color:var(--text,#f0f4f6);text-decoration:underline}",
+    ".rc-help{display:grid;gap:10px}",
+    ".rc-help a.rc-go{color:#fff;text-decoration:none}",
     ".rc-link{border:0;background:none;padding:0;font:inherit;color:var(--text,#f0f4f6);text-decoration:underline;text-underline-offset:2px;cursor:pointer}",
     ".rc-link:hover{color:var(--crimson,#d5243e)}",
     ".rc-msg{margin:0;font-size:13.5px;color:var(--text,#f0f4f6)}",
@@ -87,7 +93,7 @@
         '<div class="rc-pane" id="rc-pane-wallet" role="tabpanel" aria-labelledby="rc-tab-wallet" hidden>' +
           '<p class="rc-what">Your RougeChain wallet signs a one-time message that proves it\'s yours. Nothing goes on chain and no funds can move.</p>' +
           '<button class="rc-go" type="button" data-act="wallet">Sign in with RougeChain wallet</button>' +
-          '<p class="rc-alt">First time? Signing in makes your store account.</p>' +
+          '<p class="rc-alt">Works with the RougeChain Wallet extension and with Qwalla. First time? Signing in makes your store account.</p>' +
         '</div>' +
       '</div>' +
       '<div class="rc-acct-body" data-view="in" hidden>' +
@@ -117,7 +123,7 @@
         '<button class="rc-go rc-quiet" type="button" data-act="signout">Sign out</button>' +
       '</div>' +
       '<p class="rc-msg" role="status" aria-live="polite"></p>' +
-      '<p class="rc-hint" data-wallet-help hidden></p>' +
+      '<div class="rc-hint rc-help" data-wallet-help hidden></div>' +
     '</div>';
   RC.panel.mount(panel);
 
@@ -199,13 +205,22 @@
   $("[data-act=resend]").addEventListener("click", function () { run(sendCode(sentTo, function () { $("#rc-code").focus(); })); });
 
   // ---- RougeChain wallet
+  // Opens this page in Qwalla's browser, with the sign-in panel ready.
+  function qwallaLink() {
+    return "qwalla:///(tabs)/browser?url=" + encodeURIComponent(location.origin + location.pathname + "#sign-in");
+  }
   function walletProblem() {
     var p = window.rougechain;
     if (!p || !p.isRougeChain) {
-      return 'No RougeChain wallet found in this browser. <a href="' + WALLET_URL + '" target="_blank" rel="noopener">Get the RougeChain Wallet extension</a> for Chrome, Edge or Brave, then reload this page.';
+      if (PHONE) {
+        return '<span>No RougeChain wallet in this browser. Open the store in Qwalla, the RougeChain wallet app, and sign in there.</span>' +
+          '<a class="rc-go" href="' + qwallaLink() + '">Open in Qwalla</a>' +
+          '<span>Don\'t have it? <a href="' + QWALLA_URL + '" target="_blank" rel="noopener">Get Qwalla</a> for iPhone or Android.</span>';
+      }
+      return '<span>No RougeChain wallet found in this browser. Get the <a href="' + WALLET_URL + '" target="_blank" rel="noopener">RougeChain Wallet extension</a> for Chrome, Edge or Brave, or browse with <a href="' + QWALLA_URL + '" target="_blank" rel="noopener">Qwalla Browser</a>, then reload this page.</span>';
     }
     if (typeof p.signMessage !== "function") {
-      return "Your RougeChain wallet needs an update to sign in (version 1.8 or later). Update it, then reload this page.";
+      return "<span>Your wallet needs an update to sign in: RougeChain Wallet 1.8 or later, or the latest Qwalla. Update it, then reload this page.</span>";
     }
     return "";
   }
@@ -362,5 +377,11 @@
     }
     setAccount(d.account, false);
     top.hidden = false;
+    // Arrived from "Open in Qwalla": go straight to the wallet sign-in.
+    if (location.hash === "#sign-in") {
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+      if (!account) tab("wallet");
+      RC.panel.open(panel, top);
+    }
   }).catch(function () { /* no accounts API here: leave sign-in out */ });
 })();

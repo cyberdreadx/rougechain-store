@@ -129,10 +129,16 @@ Optional settings:
 | `ROUGECHAIN_CHAIN_ID` | `rougechain-mainnet-1` | The network named in wallet sign-in messages (`rougechain-devnet-1` for testnet). |
 | `AUTH_SECRET` | made and kept in the store | A long random string used to hash email codes. Set it if you'd rather keep it outside the data. |
 
-**Wallet sign-in needs RougeChain Wallet 1.8 or later**, the first version with `signMessage`. The
-store checks for it and asks people with an older wallet to update. The Chrome Web Store had 1.6.0 on
-2026-10-17; publish the current extension (`apps/extension` in rougechain-node, 1.9.0) to turn wallet
-sign-in on for everyone.
+**Which wallets sign in.** Any wallet with `window.rougechain.signMessage`:
+
+- **Qwalla** (iPhone, Android, desktop and Qwalla Browser): its built-in browser has it. On a phone
+  without a wallet, the panel shows **Open in Qwalla**, a `qwalla:///(tabs)/browser?url=…` link that
+  opens the same page in Qwalla with the sign-in panel ready (`#sign-in`), plus a link to qwalla.io.
+- **RougeChain Wallet extension** 1.8 or later. The Chrome Web Store had 1.6.0 on 2026-10-17;
+  publishing the current extension (`apps/extension` in rougechain-node, 1.9.0) turns it on for
+  Chrome, Edge and Brave users.
+
+A wallet without `signMessage` is asked to update. The store never falls back to `signTransaction`.
 
 ### Where the data lives
 
