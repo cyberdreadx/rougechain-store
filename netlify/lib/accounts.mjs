@@ -87,7 +87,7 @@ export async function handle(req, context = {}, deps = {}) {
     }
     return json(200, await route(x), x.cookies);
   } catch (e) {
-    if (e instanceof HttpError) return json(e.status, { error: e.message }, x.cookies);
+    if (e instanceof HttpError) return json(e.status, { error: e.message, ...e.extra }, x.cookies);
     console.error("[accounts]", e);
     return json(500, { error: "Something went wrong on our side. Try again in a minute." });
   }
@@ -220,7 +220,7 @@ async function emailCode(x) {
   const key = `code/${S.sha256(email)}`;
   const prev = await x.db.get(key);
   if (prev && x.now() - prev.sentAt < CODE_COOLDOWN_MS) {
-    throw new HttpError(429, "We just sent you a code. Wait a minute before asking for another.");
+    throw new HttpError(429, "We just sent you a code. Wait a minute before asking for another.", { codeSent: true });
   }
   const code = S.newCode();
   await x.db.put(key, { id: S.newId(""), h: S.codeHash(await codeSecret(x), email, code), exp: x.now() + CODE_MS, sentAt: x.now() });

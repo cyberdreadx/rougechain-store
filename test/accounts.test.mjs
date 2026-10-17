@@ -109,6 +109,7 @@ test("codes expire after 10 minutes and can't be re-sent within a minute", async
   await b.call("POST", "/auth/email/code", { email: "oracle@example.com" });
   const soon = await b.call("POST", "/auth/email/code", { email: "oracle@example.com" });
   assert.equal(soon.status, 429);
+  assert.equal(soon.body.codeSent, true);
   b.clock.t += 10 * 60_000 + 1;
   const late = await b.call("POST", "/auth/email/verify", { email: "oracle@example.com", code: b.lastCode() });
   assert.equal(late.status, 400);

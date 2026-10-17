@@ -3,11 +3,12 @@
 export const COOKIE = "__Host-rc_session";
 export const SESSION_MS = 30 * 24 * 60 * 60 * 1000;
 
-/** An error whose message is safe to show the visitor. */
+/** An error whose message is safe to show the visitor. `extra` fields go into the reply too. */
 export class HttpError extends Error {
-  constructor(status, message) {
+  constructor(status, message, extra = {}) {
     super(message);
     this.status = status;
+    this.extra = extra;
   }
 }
 

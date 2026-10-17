@@ -86,10 +86,13 @@ Nothing in `store-config.js` is secret: Payment Links are meant to be public. Ne
 
 ## Accounts and sign-in
 
-**Sign in** sits in the store bar. There are two ways in, and both reach the same account once linked:
+**Sign in** sits in the store bar. It opens one screen: **Continue with RougeChain wallet**, or an
+email and **Continue**. Both reach the same account once linked, and there's no separate sign-up.
 
-- **Email.** A password, or a 6-digit code we email. The code also makes new accounts and resets
-  forgotten passwords, so there's no separate sign-up or reset page.
+- **Email.** Continue emails a 6-digit code, which signs in by itself once it's typed (or pasted).
+  New addresses get an account. People who set a password can use it instead ("Use password
+  instead"); the browser remembers that and goes straight to the password next time. Forgotten
+  passwords are reset with a code.
 - **RougeChain wallet.** The wallet signs a one-time *Sign-In with RougeChain* message with its
   ML-DSA-65 key. Nothing goes on chain and no funds can move. The function checks it with
   `verifySignIn` from `@rougechain/sdk`, following
@@ -104,8 +107,10 @@ While someone is signed in:
   In Stripe, each payment's Checkout Session shows the account id as its **client reference ID**,
   which is what a "My library" page can use later.
 
-From the account panel people can add an email to a wallet account (or the other way round), set or
-change a password, and remove either sign-in method as long as the other one stays.
+Signed in, the same button opens a short list (Email, Wallet, Password). Each row opens its own
+screen: add an email to a wallet account or a wallet to an email account (one tap, the wallet asks),
+set or change a password, or remove either sign-in while the other one stays. Sign out is at the
+bottom.
 
 ### Turn it on
 
@@ -118,8 +123,7 @@ change a password, and remove either sign-in method as long as the other one sta
    | `RESEND_API_KEY` | the Resend API key (`re_…`). Mark it as secret. |
    | `AUTH_EMAIL_FROM` | who the emails come from, e.g. `RougeChain Store <login@rougechain.io>` (that is the default). The domain must be verified in Resend. |
 
-3. Deploy again. Until `RESEND_API_KEY` is set, the panel offers wallet sign-in only and says email
-   sign-in opens soon.
+3. Deploy again. Until `RESEND_API_KEY` is set, sign-in shows the wallet button only.
 
 Optional settings:
 
@@ -132,8 +136,9 @@ Optional settings:
 **Which wallets sign in.** Any wallet with `window.rougechain.signMessage`:
 
 - **Qwalla** (iPhone, Android, desktop and Qwalla Browser): its built-in browser has it. On a phone
-  without a wallet, the panel shows **Open in Qwalla**, a `qwalla:///(tabs)/browser?url=…` link that
-  opens the same page in Qwalla with the sign-in panel ready (`#sign-in`), plus a link to qwalla.io.
+  without a wallet, the button reads **Continue with Qwalla** and opens the same page in Qwalla
+  (`qwalla:///(tabs)/browser?url=…#sign-in`, which lands on sign-in). If Qwalla doesn't open, it
+  says so in one line with a link to qwalla.io.
 - **RougeChain Wallet extension** 1.8 or later. The Chrome Web Store had 1.6.0 on 2026-10-17;
   publishing the current extension (`apps/extension` in rougechain-node, 1.9.0) turns it on for
   Chrome, Edge and Brave users.
