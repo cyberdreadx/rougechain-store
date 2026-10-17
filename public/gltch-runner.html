@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gltch Runner · RougeChain Store</title>
+<meta name="description" content="Gltch Runner: a cyberpunk FPS from RougeChain Technologies, in Early Access. Kestrel Block, eleven missing days, 16 guns and a katana, 8 arenas.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Layout: a storefront page in the game's own skin. Store bar, then the title, a media viewer beside the
+   capsule and facts, the buy box, then the long read (about, arsenal, arenas, specs) beside a sidebar of
+   features. One dark look on purpose: it is the game's night. */
+:root {
+  color-scheme: dark;
+  --ink: #06080e;          /* the page: blue-black, the street at 21:30 */
+  --panel: #0e131f;        /* surfaces */
+  --panel-hi: #151c2d;     /* raised: buy boxes, chips */
+  --line: #222b42;         /* hairlines */
+  --text: #e8ebf4;
+  --muted: #8c95ad;
+  --cyan: #38e1ff;         /* Kestrel's cyan neon */
+  --pink: #ff3f8f;         /* AFTERIMAGE pink: the one hot accent, buy buttons */
+  --amber: #ffb648;        /* lantern amber: dates, notes */
+  --crimson: #d9203f;      /* RougeChain */
+  --shade: rgba(6, 8, 14, .72);
+  --display: "Orbitron", "Rajdhani", "Arial Narrow", sans-serif;
+  --ui: "Rajdhani", "Arial Narrow", "Segoe UI", sans-serif;
+  --body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Share Tech Mono", ui-monospace, "Consolas", monospace;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--ink);
+  background-image:
+    radial-gradient(1200px 520px at 78% -8%, rgba(56, 225, 255, .10), transparent 62%),
+    radial-gradient(900px 480px at 8% 4%, rgba(255, 63, 143, .09), transparent 60%);
+  background-repeat: no-repeat;
+  color: var(--text);
+  font: 400 15px/1.55 var(--body);
+}
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+img { max-width: 100%; display: block; }
+
+/* ---------- the store bar ---------- */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(9, 12, 20, .92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 10px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font: 700 15px/1 var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--text); }
+.brand img { width: 28px; height: 28px; }
+.brand b { color: var(--crimson); font-weight: 700; }
+.nav { display: flex; gap: 18px; flex-wrap: wrap; font: 600 15px/1 var(--ui); letter-spacing: .06em; text-transform: uppercase; }
+.nav a { color: var(--muted); }
+.nav a:hover { color: var(--text); text-decoration: none; }
+.bar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.pill-btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel); padding: 7px 12px; border-radius: 3px; font: 600 14px/1 var(--ui); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.pill-btn:hover { border-color: var(--cyan); }
+.count { font-family: var(--mono); color: var(--cyan); }
+
+/* ---------- page ---------- */
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 22px 56px; }
+.crumbs { font: 500 14px/1.2 var(--ui); color: var(--muted); letter-spacing: .04em; }
+.crumbs span { margin: 0 6px; opacity: .6; }
+.title-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+h1.title { margin: 0; font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); letter-spacing: .06em; text-wrap: balance;
+  text-shadow: -2px 0 rgba(56, 225, 255, .55), 2px 0 rgba(255, 63, 143, .55); }
+.title-row .studio { font: 600 15px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.title-row .studio b { color: var(--text); font-weight: 600; }
+@media (prefers-reduced-motion: no-preference) {
+  h1.title { animation: glitch 1.6s steps(1) 1 .3s both; }
+  @keyframes glitch {
+    0%, 100% { transform: none; clip-path: none; }
+    6% { transform: translateX(-3px); clip-path: inset(10% 0 55% 0); }
+    9% { transform: translateX(3px); clip-path: inset(48% 0 12% 0); }
+    12% { transform: none; clip-path: none; }
+    62% { transform: translateX(2px); clip-path: inset(30% 0 40% 0); }
+    64% { transform: none; clip-path: none; }
+  }
+}
+
+/* ---------- hero: media + capsule ---------- */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; margin-top: 16px; background: linear-gradient(180deg, rgba(14, 19, 31, .9), rgba(14, 19, 31, .55)); border: 1px solid var(--line); padding: 14px; }
+.media { min-width: 0; display: grid; gap: 10px; }
+.stage { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: #000; overflow: hidden; }
+.stage img { width: 100%; height: 100%; object-fit: cover; transition: opacity .25s ease; }
+.stage .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 14px 10px; background: linear-gradient(transparent, rgba(0, 0, 0, .75)); font: 600 15px/1.2 var(--ui); letter-spacing: .05em; }
+.stage .tag { position: absolute; left: 10px; top: 10px; font: 400 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; background: var(--shade); border: 1px solid var(--line); padding: 5px 7px; color: var(--cyan); }
+.stage .arrow { position: absolute; top: 50%; translate: 0 -50%; width: 40px; height: 64px; border: 0; background: rgba(0, 0, 0, .35); cursor: pointer; font: 400 26px/1 var(--mono); color: var(--text); opacity: .7; }
+.stage .arrow:hover { opacity: 1; background: rgba(0, 0, 0, .6); }
+.stage .prev { left: 0; } .stage .next { right: 0; }
+.strip { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-color: var(--line) transparent; }
+.thumb { flex: 0 0 auto; width: 116px; aspect-ratio: 16 / 9; padding: 0; border: 2px solid transparent; background: #000; cursor: pointer; opacity: .62; transition: opacity .15s, border-color .15s; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb:hover { opacity: 1; }
+.thumb[aria-current="true"] { opacity: 1; border-color: var(--cyan); }
+.info { min-width: 0; display: grid; gap: 12px; align-content: start; }
+.capsule { position: relative; aspect-ratio: 460 / 215; max-width: 100%; overflow: hidden; background: #000; }
+.capsule img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.1) brightness(.82); }
+.capsule .mark { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 6px; }
+.capsule .mark strong { font: 900 30px/1 var(--display); letter-spacing: .08em; text-shadow: -2px 0 rgba(56, 225, 255, .8), 2px 0 rgba(255, 63, 143, .8), 0 0 24px rgba(0, 0, 0, .8); }
+.capsule .mark small { font: 600 12px/1 var(--ui); letter-spacing: .32em; text-transform: uppercase; color: var(--amber); text-shadow: 0 0 10px #000; }
+.pitch { margin: 0; color: #cfd5e4; font-size: 14.5px; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 13px; }
+.facts dt { font: 600 12px/1.6 var(--ui); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0; color: var(--text); }
+.facts .none { color: var(--amber); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags span { font: 600 13px/1 var(--ui); letter-spacing: .03em; padding: 5px 8px; background: var(--panel-hi); border: 1px solid var(--line); color: var(--cyan); }
+
+/* ---------- the row of actions under the hero ---------- */
+.actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); }
+.actions .note { margin-left: auto; font: 500 14px/1.2 var(--ui); color: var(--muted); letter-spacing: .03em; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel-hi); padding: 9px 14px; font: 700 15px/1 var(--ui); letter-spacing: .07em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.btn:hover { border-color: var(--cyan); }
+.btn[aria-pressed="true"] { border-color: var(--pink); color: var(--pink); }
+.btn.hot { background: linear-gradient(135deg, var(--crimson), #692f96); border-color: transparent; color: #fff; box-shadow: 0 0 18px rgba(217, 32, 63, .25); }
+.btn.hot:hover { filter: brightness(1.08); }
+
+/* ---------- body: long read + sidebar ---------- */
+.body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 26px; margin-top: 26px; }
+.main { min-width: 0; display: grid; gap: 30px; align-content: start; }
+.side { min-width: 0; display: grid; gap: 16px; align-content: start; }
+h2.sec { margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); font: 700 17px/1.2 var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--text); }
+h2.sec small { font: 400 12px/1 var(--mono); color: var(--muted); letter-spacing: .06em; margin-left: 8px; text-transform: none; }
+
+/* buy box */
+.buy { position: relative; background: linear-gradient(90deg, var(--panel-hi), var(--panel)); border: 1px solid var(--line); padding: 16px 16px 18px; display: grid; gap: 4px; }
+.buy h3 { margin: 0; font: 700 22px/1.15 var(--ui); letter-spacing: .03em; }
+.buy p { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 58ch; }
+.buy .platform { position: absolute; right: 16px; top: 16px; font: 400 12px/1 var(--mono); color: var(--muted); letter-spacing: .08em; }
+.price-row { display: flex; justify-content: flex-end; margin-top: 10px; }
+.price-box { display: flex; align-items: stretch; background: #000; padding: 3px; gap: 3px; }
+.price-box .price { display: grid; place-content: center; padding: 0 14px; font: 400 16px/1 var(--mono); color: var(--text); background: #0b0f19; min-width: 108px; text-align: center; }
+.price-box .price small { display: block; font-size: 10px; color: var(--muted); letter-spacing: .12em; margin-bottom: 3px; }
+
+/* updates */
+.updates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.update { background: var(--panel); border: 1px solid var(--line); display: grid; grid-template-rows: auto 1fr; }
+.update img { aspect-ratio: 16 / 9; width: 100%; object-fit: cover; }
+.update div { padding: 10px 12px 12px; display: grid; gap: 4px; align-content: start; }
+.update b { font: 700 16px/1.2 var(--ui); letter-spacing: .02em; }
+.update time { font: 400 12px/1 var(--mono); color: var(--amber); letter-spacing: .06em; }
+.update p { margin: 0; color: var(--muted); font-size: 13px; }
+
+/* about */
+.about { display: grid; gap: 22px; }
+.lede { margin: 0; font-size: 17px; line-height: 1.6; color: #dfe4f0; max-width: 64ch; }
+.feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: center; }
+.feature.flip > figure { order: 2; }
+.feature figure { margin: 0; border: 1px solid var(--line); background: #000; }
+.feature figure img { aspect-ratio: 16 / 9; width: 100%; object-fit: cover; }
+.feature figcaption { font: 400 12px/1.3 var(--mono); color: var(--muted); padding: 7px 9px; border-top: 1px solid var(--line); }
+.feature h3 { margin: 0 0 6px; font: 700 21px/1.15 var(--ui); letter-spacing: .08em; text-transform: uppercase; }
+.feature h3 em { font-style: normal; color: var(--pink); }
+.feature p { margin: 0 0 8px; color: #c8cfdf; max-width: 60ch; }
+.facts-line { font: 400 12.5px/1.5 var(--mono); color: var(--cyan); letter-spacing: .03em; }
+
+/* arsenal */
+.arsenal { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.gun { background: radial-gradient(120% 90% at 50% 40%, #182035, var(--panel)); border: 1px solid var(--line); padding: 10px 10px 9px; display: grid; gap: 6px; }
+.gun img { height: 66px; width: 100%; object-fit: contain; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .6)); }
+.gun b { font: 700 14px/1 var(--ui); letter-spacing: .06em; }
+.gun span { font: 400 11.5px/1 var(--mono); color: var(--muted); }
+.gun.blade { border-color: rgba(255, 63, 143, .45); }
+
+/* arenas + modes */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span { font: 600 14px/1 var(--ui); letter-spacing: .05em; padding: 7px 10px; border: 1px solid var(--line); background: var(--panel); }
+.chips.modes span { color: var(--amber); }
+
+/* specs */
+.specs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; background: var(--panel); border: 1px solid var(--line); padding: 14px 16px; }
+.specs h4 { margin: 0 0 8px; font: 700 13px/1 var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.specs dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 13px; }
+.specs dt { font: 600 12px/1.6 var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.specs dd { margin: 0; }
+.specs .tbc { color: var(--amber); }
+
+/* reviews (none yet) */
+.reviews { background: var(--panel); border: 1px dashed var(--line); padding: 22px 18px; display: grid; gap: 6px; justify-items: start; }
+.reviews b { font: 700 18px/1.2 var(--ui); letter-spacing: .04em; }
+.reviews p { margin: 0; color: var(--muted); }
+
+/* sidebar */
+.box { background: var(--panel); border: 1px solid var(--line); padding: 12px; display: grid; gap: 8px; }
+.box h4 { margin: 0; font: 700 13px/1 var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.feats { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.feats li { display: flex; gap: 10px; align-items: center; padding: 7px 8px; background: var(--panel-hi); font: 600 14.5px/1.2 var(--ui); letter-spacing: .03em; }
+.feats li i { width: 18px; height: 18px; flex: 0 0 18px; border: 1px solid var(--cyan); display: grid; place-content: center; font: 400 10px/1 var(--mono); font-style: normal; color: var(--cyan); }
+.langs { width: 100%; border-collapse: collapse; font-size: 13px; }
+.langs th { font: 600 12px/1.4 var(--ui); letter-spacing: .06em; color: var(--muted); text-align: center; font-weight: 600; }
+.langs th:first-child, .langs td:first-child { text-align: left; }
+.langs td { text-align: center; padding: 4px 0; border-top: 1px solid var(--line); }
+.langs .yes { color: var(--cyan); font-family: var(--mono); }
+.content-note { background: rgba(255, 182, 72, .08); border: 1px solid rgba(255, 182, 72, .35); padding: 10px 12px; font-size: 13px; color: #f1d9b0; display: grid; gap: 4px; }
+.content-note b { font: 700 13px/1.2 var(--ui); letter-spacing: .1em; text-transform: uppercase; color: var(--amber); }
+.dev { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; align-items: center; }
+.dev img { width: 48px; height: 48px; }
+.dev b { font: 700 16px/1.1 var(--ui); letter-spacing: .04em; display: block; }
+.dev span { color: var(--muted); font-size: 13px; }
+
+footer { border-top: 1px solid var(--line); }
+footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 22px; }
+
+/* ---------- early access ---------- */
+.ea-badge { font: 700 13px/1 var(--ui); letter-spacing: .16em; text-transform: uppercase; color: var(--ink); background: var(--cyan); padding: 6px 9px 5px; align-self: center; }
+.title-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.ea { border: 1px solid rgba(56, 225, 255, .4); background: linear-gradient(180deg, rgba(56, 225, 255, .08), rgba(14, 19, 31, .6)); }
+.ea-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid rgba(56, 225, 255, .25); }
+.ea-head h2 { margin: 0; font: 700 19px/1.1 var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--cyan); }
+.ea-head p { margin: 0; color: #cdd6e6; font-size: 14px; max-width: 70ch; }
+.ea-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; padding: 14px 16px 16px; }
+.ea-cols h3 { margin: 0 0 8px; font: 700 13px/1 var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.ea-cols ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.ea-cols li { position: relative; padding-left: 16px; font-size: 13.5px; color: #d3d9e7; }
+.ea-cols li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; background: var(--cyan); }
+.ea-cols .later li::before { background: transparent; border: 1px solid var(--amber); }
+.promo { font: 700 13px/1.2 var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
+.price-box .disc { display: grid; place-content: center; padding: 0 12px; font: 700 26px/1 var(--ui); color: var(--text); background: var(--crimson); letter-spacing: .02em; }
+.price-box .price .was { display: block; font-size: 12px; color: var(--muted); text-decoration: line-through; margin-bottom: 3px; }
+.price-box .price .now { display: block; font-size: 18px; color: var(--text); }
+.line .amt s { display: block; font-size: 11px; color: var(--muted); text-align: right; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- narrow ---------- */
+@media (max-width: 960px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .body { grid-template-columns: minmax(0, 1fr); }
+  .updates { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 680px) {
+  .feature { grid-template-columns: minmax(0, 1fr); }
+  .feature.flip > figure { order: 0; }
+  .specs { grid-template-columns: minmax(0, 1fr); }
+  .ea-cols { grid-template-columns: minmax(0, 1fr); }
+  .nav { display: none; }
+  .actions .note { margin-left: 0; width: 100%; }
+  .buy .platform { position: static; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<div class="bar">
+  <div class="bar-in">
+    <a class="brand" href="index.html" aria-label="RougeChain Store home"><img src="img/rougechain.png" alt=""><span><b>ROUGECHAIN</b> STORE</span></a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#about">About</a>
+      <a href="#arsenal">Arsenal</a>
+      <a href="#arenas">Arenas</a>
+      <a href="#specs">Requirements</a>
+    </nav>
+    <div class="bar-right">
+      <button class="pill-btn" id="wishlist-top" type="button">Wishlist <span class="count" id="wish-count">0</span></button>
+      <button class="pill-btn" id="cart-top" type="button">Cart <span class="count" id="cart-count">0</span></button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap" id="top">
+  <div class="crumbs"><a href="index.html#games">All Games</a><span>›</span>Action<span>›</span>Cyberpunk<span>›</span>Gltch Runner</div>
+  <div class="title-row">
+    <div class="title-left"><h1 class="title">GLTCH RUNNER</h1><span class="ea-badge">Early Access</span></div>
+    <div class="studio">by <b>RougeChain Technologies</b></div>
+  </div>
+
+  <section class="hero" aria-label="Screenshots and summary">
+    <div class="media">
+      <div class="stage">
+        <img id="stage-img" src="img/kestrel-night.jpg" alt="">
+        <span class="tag" id="stage-tag">Story</span>
+        <div class="cap" id="stage-cap">Kestrel Block at half past nine, in the rain</div>
+        <button class="arrow prev" id="prev" type="button" aria-label="Previous screenshot">‹</button>
+        <button class="arrow next" id="next" type="button" aria-label="Next screenshot">›</button>
+      </div>
+      <div class="strip" id="strip" role="list" aria-label="Screenshots"></div>
+    </div>
+    <div class="info">
+      <div class="capsule">
+        <img src="img/capsule.jpg" alt="Kestrel Block at night: cherry trees, lanterns and a neon sign in the rain">
+        <div class="mark"><strong>GLTCH RUNNER</strong><small>Eleven days missing</small></div>
+      </div>
+      <p class="pitch">You wake in flat 306, over a mechanic's workshop, with eleven days cut out of your memory. Kestrel Block keeps its own hours: neighbours, noodle counters, neon in the rain. Every contract takes you somewhere new to win one of those days back.</p>
+      <dl class="facts">
+        <dt>Reviews</dt><dd class="none">No reviews yet</dd>
+        <dt>Release date</dt><dd>Early Access alpha · date to be announced</dd>
+        <dt>Developer</dt><dd>RougeChain Technologies</dd>
+        <dt>Publisher</dt><dd>RougeChain Technologies</dd>
+      </dl>
+      <div class="tags" aria-label="Tags">
+        <span>Early Access</span><span>Cyberpunk</span><span>FPS</span><span>Story Rich</span><span>Parkour</span><span>Singleplayer</span><span>Multiplayer</span><span>Atmospheric</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button class="btn" id="wish" type="button" aria-pressed="false" data-wish="gltch-runner">♡ Add to wishlist</button>
+    <button class="btn" id="follow" type="button" aria-pressed="false" data-follow="gltch-runner">Follow</button>
+    <span class="note">Early Access alpha · Windows · English</span>
+  </div>
+
+  <div class="body">
+    <div class="main">
+
+      <section class="ea" aria-labelledby="ea-h">
+        <div class="ea-head">
+          <h2 id="ea-h">Early Access game</h2>
+          <p>You play the alpha while it's being built. It isn't finished: expect missing pieces, rough edges and changes from one build to the next.</p>
+        </div>
+        <div class="ea-cols">
+          <div>
+            <h3>In the alpha now</h3>
+            <ul>
+              <li>Kestrel Block, the story's district, by day, at sunset and at night</li>
+              <li>Dead Signal, the first contract, down in NEXUS's Sublevel 3</li>
+              <li>Day Two of the eleven days: the Cold Line</li>
+              <li>Flat 306, your bag, the workbench, food, rest and XRGE</li>
+              <li>16 guns and the MonoEdge katana</li>
+              <li>8 arenas and 9 modes, with bots or over LAN</li>
+            </ul>
+          </div>
+          <div class="later">
+            <h3>Planned</h3>
+            <ul>
+              <li>The rest of the eleven days, each in a place of its own</li>
+              <li>Neon Row as a neighbourhood, home to AFTERIMAGE, reached by Line 6 or taxi</li>
+              <li>More of the city to explore</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="buy-h">
+        <h2 class="sec" id="buy-h">Buy Gltch Runner</h2>
+        <div class="buy">
+          <span class="platform">WINDOWS</span>
+          <h3>Buy Gltch Runner (Early Access)</h3>
+          <span class="promo">Early Access launch sale</span>
+          <p>The alpha build: the story of Kestrel Block from Dead Signal on, every arena and mode, and the bots to fill them.</p>
+          <div class="price-row">
+            <div class="price-box" data-price="gltch-runner">
+              <div class="disc" aria-label="33 percent off">-33%</div>
+              <div class="price"><span class="was"><span class="visually-hidden">Was </span>$30.00</span><span class="now">$20.00</span></div>
+              <button class="btn hot" type="button" data-add="gltch-runner">Add to cart</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="up-h">
+        <h2 class="sec" id="up-h">Recent updates <small>from the development log</small></h2>
+        <div class="updates">
+          <article class="update">
+            <img src="img/ground-night.jpg" alt="Wet asphalt at night, neon broken up in its grit and puddles">
+            <div><time datetime="2026-10-16">Oct 16, 2026</time><b>The ground has depth</b><p>Roads, paving and floors drawn in real relief, puddles in the cracks, and a garden of real grass.</p></div>
+          </article>
+          <article class="update">
+            <img src="img/nexus-lobby.jpg" alt="The NEXUS lobby: a holographic reception desk under neon lines">
+            <div><time datetime="2026-10-16">Oct 16, 2026</time><b>Dead Signal, rebuilt</b><p>Sublevel 3 is a robotics firm's neon-lit black site, and what comes up comes out of a hatch.</p></div>
+          </article>
+          <article class="update">
+            <img src="img/coldline-platform.jpg" alt="Halt 14: a tunnel platform with a neon advert and graffiti">
+            <div><time datetime="2026-10-16">Oct 16, 2026</time><b>The Cold Line</b><p>Day Two's freight halt is a modelled train in an arched tunnel, with the city's neon, adverts and paint down there.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="about" id="about" aria-labelledby="about-h">
+        <h2 class="sec" id="about-h">About this game</h2>
+        <p class="lede">Gltch Runner is a first-person shooter set in Kestrel Block, a few streets of a vertical city that keep their own hours. Someone took eleven days out of your head and filed them under another name. The neighbourhood knows more than it says.</p>
+
+        <div class="feature">
+          <figure><img src="img/kestrel-sunset.jpg" alt="The avenue at sunset under a pink sky, cherry trees on both pavements"><figcaption>The avenue at sunset</figcaption></figure>
+          <div>
+            <h3>A block that <em>lives</em></h3>
+            <p>Kestrel Block is a place to walk end to end, not a mission menu. Your neighbours take Line 6 to work, eat at KOMA Night Kitchen, do their washing at the Spin Cycle and spend their evenings at AFTERIMAGE.</p>
+            <p>Morning smog turns to a pink sunset and then a wet neon night. When it rains, the street fills with reflections.</p>
+            <div class="facts-line">Day · sunset · night · rain</div>
+          </div>
+        </div>
+
+        <div class="feature flip">
+          <figure><img src="img/nexus-breach.jpg" alt="A NEXUS concourse under red alarm light"><figcaption>Dead Signal: containment breach</figcaption></figure>
+          <div>
+            <h3>Eleven <em>days</em></h3>
+            <p>Dead Signal takes you down into NEXUS's Sublevel 3. After it come the eleven days themselves. Vale bottled them, and a bottled day won't take without its anchor: something real from the place it happened.</p>
+            <p>So every contract is a place of its own, one you'll only see once. Get the anchor, bring it home, and remember.</p>
+            <div class="facts-line">Day Two · The Cold Line · Halt 14</div>
+          </div>
+        </div>
+
+        <div class="feature">
+          <figure><img src="img/kestrel-garden.jpg" alt="Kestrel Garden: a paved path through long grass under cherry trees"><figcaption>Kestrel Garden</figcaption></figure>
+          <div>
+            <h3>Between <em>jobs</em></h3>
+            <p>Flat 306 in Kestrel Heights has your bed, your weapons locker and a balcony over the plaza. Eat and drink before you rest, fit gear at the workbench, and keep everything you carry in a bag that shows what it does and what it's worth.</p>
+            <p>Earn and spend XRGE, the block's coin, and stake it with KESTREL-1 for a little back each day. It's in-game money only.</p>
+            <div class="facts-line">Inventory · workbench · food and rest · 10 Genesis Papers to find</div>
+          </div>
+        </div>
+
+        <div class="feature flip">
+          <figure><img src="img/neonrow-street.jpg" alt="Neon Row at night in the rain, signs stacked up the towers"><figcaption>Neon Row, team deathmatch</figcaption></figure>
+          <div>
+            <h3>Move like a <em>runner</em></h3>
+            <p>Sprint, slide, double jump, mantle and run along walls. Tap to hack, put a drone up, throw a grenade, or holster the gun and draw the MonoEdge.</p>
+            <div class="facts-line">Wall run · slide · double jump · mantle · hacks · drones</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="arsenal" aria-labelledby="ars-h">
+        <h2 class="sec" id="ars-h">Arsenal <small>16 guns and a blade</small></h2>
+        <div class="arsenal" id="guns"></div>
+      </section>
+
+      <section id="arenas" aria-labelledby="are-h">
+        <h2 class="sec" id="are-h">Arenas <small>against bots, or friends on your network</small></h2>
+        <div class="chips" style="margin-bottom:10px">
+          <span>Helix Yard</span><span>Sublevel 9</span><span>Apex Terraces</span><span>Neontown</span><span>Byte Street</span><span>Skyline Reach</span><span>Neon Row</span><span>Fire Range</span>
+        </div>
+        <div class="chips modes">
+          <span>Team Deathmatch</span><span>Free For All</span><span>Gun Game</span><span>Domination</span><span>Search &amp; Destroy</span><span>Rush</span><span>Infestation</span><span>Katana Only</span><span>Data War</span>
+        </div>
+      </section>
+
+      <section id="specs" aria-labelledby="spec-h">
+        <h2 class="sec" id="spec-h">System requirements</h2>
+        <div class="specs">
+          <div>
+            <h4>Minimum</h4>
+            <dl>
+              <dt>OS</dt><dd>Windows 10, 64-bit</dd>
+              <dt>Graphics</dt><dd class="tbc">To be confirmed in testing</dd>
+              <dt>Memory</dt><dd class="tbc">To be confirmed</dd>
+              <dt>Storage</dt><dd class="tbc">To be confirmed</dd>
+            </dl>
+          </div>
+          <div>
+            <h4>Built and tested on</h4>
+            <dl>
+              <dt>OS</dt><dd>Windows 11, 64-bit</dd>
+              <dt>Graphics</dt><dd>NVIDIA GeForce RTX 4090, 24 GB</dd>
+              <dt>Settings</dt><dd>Low, Medium, High, Ultra (global illumination, FSR 2)</dd>
+              <dt>Engine</dt><dd>Godot 4.7</dd>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="rev-h">
+        <h2 class="sec" id="rev-h">Customer reviews</h2>
+        <div class="reviews">
+          <b>No reviews yet</b>
+          <p>Gltch Runner isn't out, so nobody has reviewed it. Reviews will show here after launch.</p>
+        </div>
+      </section>
+    </div>
+
+    <aside class="side" aria-label="Game details">
+      <div class="box">
+        <h4>Features</h4>
+        <ul class="feats">
+          <li><i>1</i>Single-player story</li>
+          <li><i>⇄</i>LAN multiplayer</li>
+          <li><i>⚙</i>Bots to fight or team with</li>
+          <li><i>◎</i>Controller support</li>
+          <li><i>◐</i>Day, night and rain</li>
+          <li><i>▤</i>Four graphics settings</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h4>Languages</h4>
+        <table class="langs">
+          <thead><tr><th scope="col">&nbsp;</th><th scope="col">Interface</th><th scope="col">Audio</th><th scope="col">Subtitles</th></tr></thead>
+          <tbody><tr><td>English</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr></tbody>
+        </table>
+      </div>
+      <div class="content-note">
+        <b>Mature content</b>
+        Frequent violence and gore, strong language, drug and alcohol use, and non-explicit sexual content.
+      </div>
+      <div class="box">
+        <h4>Developer</h4>
+        <div class="dev"><img src="img/rougechain.png" alt="RougeChain Technologies logo"><div><b>RougeChain Technologies</b><span>Independent studio, makers of Gltch Runner.</span></div></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 RougeChain Technologies</span>
+    <span>Gltch Runner is in development. Screenshots are from the current build and everything here may change.</span>
+    <span data-contact></span>
+    <span data-legal></span>
+  </div>
+</footer>
+
+<script src="store-config.js"></script>
+<script src="store.js"></script>
+<script>
+(function () {
+  var SHOTS = [
+    ["kestrel-night", "Story", "Kestrel Block at half past nine, in the rain"],
+    ["neonrow-street", "Arena", "Neon Row: team deathmatch down a street canyon"],
+    ["kestrel-sunset", "Story", "Sunset over the avenue"],
+    ["nexus-lobby", "Dead Signal", "The NEXUS black site, Sublevel 3"],
+    ["coldline-platform", "Day Two", "Halt 14 on the Cold Line"],
+    ["neonrow-low", "Arena", "Rain on Neon Row"],
+    ["kestrel-day", "Story", "The avenue at ten in the morning"],
+    ["nexus-breach", "Dead Signal", "Containment breach"],
+    ["coldline-red", "Day Two", "The halt goes to red"],
+    ["kestrel-above", "Story", "Kestrel Block from above"],
+    ["kestrel-garden", "Story", "Kestrel Garden"],
+    ["neonrow-lane", "Arena", "A service lane off Neon Row"]
+  ];
+  var GUNS = [
+    ["G17", "Pistol"], ["VOLT-9", "SMG"], ["HELIX-5", "Assault rifle"], ["BREACH-12", "Shotgun"],
+    ["LONGSHOT", "Sniper rifle"], ["JUDGE-6", "Pistol"], ["TEMPEST-50", "SMG"], ["KITSUNE-B", "Assault rifle"],
+    ["REVENANT-8", "Shotgun"], ["ONI-50", "Sniper rifle"], ["VIPER-18", "Pistol"], ["ARC-77", "Rocket launcher"],
+    ["WASP-32", "SMG"], ["BREAKER-7", "Shotgun"], ["RAIJIN-EM", "EM sniper rifle"], ["ARCCASTER", "Plasma rifle"]
+  ];
+
+  // ---- the screenshots
+  var strip = document.getElementById("strip");
+  var img = document.getElementById("stage-img");
+  var cap = document.getElementById("stage-cap");
+  var tag = document.getElementById("stage-tag");
+  var at = 0;
+  SHOTS.forEach(function (s, i) {
+    var b = document.createElement("button");
+    b.className = "thumb"; b.type = "button"; b.setAttribute("role", "listitem");
+    b.setAttribute("aria-label", s[2]);
+    b.innerHTML = '<img src="img/' + s[0] + '-t.jpg" alt="">';
+    b.addEventListener("click", function () { show(i); });
+    strip.appendChild(b);
+  });
+  function show(i) {
+    at = (i + SHOTS.length) % SHOTS.length;
+    var s = SHOTS[at];
+    img.style.opacity = 0;
+    var next = new Image();
+    next.onload = next.onerror = function () { img.src = next.src; img.alt = s[2]; img.style.opacity = 1; };
+    next.src = "img/" + s[0] + ".jpg";
+    cap.textContent = s[2]; tag.textContent = s[1];
+    Array.prototype.forEach.call(strip.children, function (t, k) { t.setAttribute("aria-current", k === at ? "true" : "false"); });
+    var t = strip.children[at];
+    if (t) { strip.scrollTo({ left: t.offsetLeft - strip.clientWidth / 2 + t.clientWidth / 2, behavior: "smooth" }); }
+  }
+  document.getElementById("prev").addEventListener("click", function () { show(at - 1); });
+  document.getElementById("next").addEventListener("click", function () { show(at + 1); });
+  document.addEventListener("keydown", function (e) {
+    if (document.querySelector(".rc-panel:not([hidden])")) return;
+    if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (e.key === "ArrowLeft") show(at - 1);
+    if (e.key === "ArrowRight") show(at + 1);
+  });
+  show(0);
+
+  // ---- the arsenal
+  var guns = document.getElementById("guns");
+  GUNS.forEach(function (g, i) {
+    var d = document.createElement("div");
+    d.className = "gun";
+    d.innerHTML = '<img src="img/w' + String(i).padStart(2, "0") + '.png" alt="' + g[0] + '" loading="lazy"><b>' + g[0] + '</b><span>' + g[1] + '</span>';
+    guns.appendChild(d);
+  });
+  var blade = document.createElement("div");
+  blade.className = "gun blade";
+  blade.innerHTML = '<img src="img/katana.png" alt="MonoEdge katana" loading="lazy"><b>MONOEDGE</b><span>Katana</span>';
+  guns.appendChild(blade);
+
+  // ---- the store bar's wishlist button: to this game's wishlist button
+  document.getElementById("wishlist-top").addEventListener("click", function () {
+    var wish = document.getElementById("wish");
+    wish.scrollIntoView({ behavior: "smooth", block: "center" }); wish.focus({ preventScroll: true });
+  });
+})();
+</script>
+</body>
+</html>

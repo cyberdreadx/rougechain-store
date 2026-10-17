@@ -1,0 +1,6 @@
+/* The store's own copies of the game's typefaces, served from this site (not from Google), under the
+   SIL Open Font License: see the OFL files beside them. Medium (500) is drawn with SemiBold. */
+@font-face { font-family: "Rajdhani"; src: url("Rajdhani-SemiBold.ttf") format("truetype"); font-weight: 500 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Rajdhani"; src: url("Rajdhani-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Orbitron"; src: url("Orbitron.ttf") format("truetype"); font-weight: 400 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Share Tech Mono"; src: url("ShareTechMono.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }

@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RougeChain Store</title>
+<meta name="description" content="RougeChain Technologies' store: games, merch, apps and more. Gltch Runner is in Early Access.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Layout: the store's front window. Store bar; the featured game as one wide card; the four
+   departments as tiles cut on the logo's diagonal; the one live offer; then each department's shelf,
+   empty ones saying so plainly. One dark look on purpose: products bring their own colour. */
+:root {
+  color-scheme: dark;
+  --ink: #07080d;          /* the page */
+  --panel: #10121b;        /* surfaces */
+  --panel-hi: #171a27;     /* raised */
+  --line: #252839;         /* hairlines */
+  --text: #f0f4f6;         /* the logo's white */
+  --muted: #9095a8;
+  --crimson: #d5243e;      /* the logo's red */
+  --violet: #692f96;       /* the logo's purple */
+  --violet-hi: #9b5bd0;    /* purple, lifted to read as text on ink */
+  --cyan: #38e1ff;         /* Gltch Runner's own neon, only on its card */
+  --amber: #ffb648;        /* notes, dates */
+  --display: "Rajdhani", "Arial Narrow", sans-serif;
+  --game: "Orbitron", "Rajdhani", sans-serif;
+  --body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Share Tech Mono", ui-monospace, "Consolas", monospace;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--ink);
+  background-image: linear-gradient(135deg, rgba(213, 36, 62, .13) 0%, transparent 34%), linear-gradient(315deg, rgba(105, 47, 150, .16) 0%, transparent 38%);
+  background-attachment: fixed;
+  color: var(--text);
+  font: 400 15px/1.55 var(--body);
+}
+a { color: inherit; text-decoration: none; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--violet-hi); outline-offset: 2px; }
+img { max-width: 100%; display: block; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- store bar ---------- */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(9, 10, 16, .93); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 10px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font: 700 16px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; }
+.brand img { width: 30px; height: 30px; }
+.brand b { color: var(--crimson); font-weight: 700; }
+.nav { display: flex; gap: 18px; flex-wrap: wrap; font: 600 15px/1 var(--display); letter-spacing: .07em; text-transform: uppercase; }
+.nav a { color: var(--muted); }
+.nav a:hover { color: var(--text); }
+.search { position: relative; margin-left: auto; flex: 0 1 260px; min-width: 0; }
+.search input { width: 100%; background: var(--panel); border: 1px solid var(--line); padding: 8px 10px; font-size: 14px; border-radius: 2px; }
+.search input::placeholder { color: var(--muted); }
+.results { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: var(--panel-hi); border: 1px solid var(--line); display: grid; z-index: 30; box-shadow: 0 12px 30px rgba(0, 0, 0, .5); }
+.results a, .results p { padding: 9px 11px; margin: 0; font-size: 14px; border-top: 1px solid var(--line); }
+.results a:first-child, .results p:first-child { border-top: 0; }
+.results a:hover, .results a:focus-visible { background: var(--panel); }
+.results small { display: block; color: var(--muted); font-size: 12px; }
+.bar-right { display: flex; gap: 8px; }
+.pill-btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel); padding: 7px 12px; border-radius: 2px; font: 600 14px/1 var(--display); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.pill-btn:hover { border-color: var(--violet-hi); }
+.count { font-family: var(--mono); color: var(--crimson); }
+
+/* ---------- page ---------- */
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 26px 56px; display: grid; gap: 38px; }
+.shelf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 7px; border-bottom: 1px solid var(--line); }
+.shelf-head h2 { margin: 0; font: 700 18px/1.1 var(--display); letter-spacing: .16em; text-transform: uppercase; }
+.shelf-head span { font: 400 12.5px/1 var(--mono); color: var(--muted); }
+
+/* the welcome line */
+.welcome { display: grid; gap: 6px; }
+.welcome h1 { margin: 0; font: 700 clamp(28px, 4.4vw, 44px)/1.05 var(--display); letter-spacing: .04em; text-transform: uppercase; text-wrap: balance; }
+.welcome h1 em { font-style: normal; background: linear-gradient(90deg, var(--crimson), var(--violet-hi)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.welcome p { margin: 0; color: var(--muted); max-width: 62ch; }
+
+/* ---------- featured ---------- */
+.featured { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); background: var(--panel); border: 1px solid var(--line); box-shadow: 0 30px 60px rgba(0, 0, 0, .45); }
+.featured:hover { border-color: #3a3150; }
+.f-art { position: relative; min-width: 0; min-height: 300px; max-width: 100%; overflow: hidden; background: #000; }
+.f-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .3s ease, transform 6s ease; }
+.featured:hover .f-art img { transform: scale(1.03); }
+.f-flag { position: absolute; left: 12px; top: 12px; font: 700 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; background: var(--cyan); color: var(--ink); padding: 6px 8px 5px; }
+.f-side { min-width: 0; padding: 18px 18px 16px; display: grid; gap: 12px; align-content: start; }
+.f-side .word { font: 900 clamp(22px, 2.6vw, 30px)/1 var(--game); letter-spacing: .07em; text-shadow: -2px 0 rgba(56, 225, 255, .6), 2px 0 rgba(255, 63, 143, .6); }
+.f-side p { margin: 0; color: #c9cedd; font-size: 14px; }
+.minis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.minis button { padding: 0; border: 2px solid transparent; background: #000; cursor: pointer; aspect-ratio: 16 / 9; opacity: .75; }
+.minis button:hover, .minis button[aria-current="true"] { opacity: 1; border-color: var(--cyan); }
+.minis img { width: 100%; height: 100%; object-fit: cover; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tags span { font: 600 12.5px/1 var(--display); letter-spacing: .03em; padding: 5px 7px; background: var(--panel-hi); border: 1px solid var(--line); color: var(--muted); }
+.f-buy { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.f-buy .see { font: 600 14px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--cyan); }
+.f-buy .see:hover { text-decoration: underline; }
+
+/* price, shared by every product */
+.price-box { display: inline-flex; align-items: stretch; background: #000; padding: 3px; gap: 3px; }
+.price-box .disc { display: grid; place-content: center; padding: 0 10px; font: 700 22px/1 var(--display); color: var(--text); background: var(--crimson); }
+.price-box .price { display: grid; place-content: center; padding: 0 12px; background: #0c0e16; text-align: right; min-width: 86px; }
+.price-box .was { font: 400 11.5px/1 var(--mono); color: var(--muted); text-decoration: line-through; margin-bottom: 3px; }
+.price-box .now { font: 400 17px/1 var(--mono); }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel-hi); padding: 9px 14px; font: 700 15px/1 var(--display); letter-spacing: .07em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.btn.buy { background: linear-gradient(135deg, var(--crimson), var(--violet)); border-color: transparent; color: #fff; }
+.btn.buy:hover { filter: brightness(1.1); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; filter: none; }
+
+/* ---------- departments ---------- */
+.depts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.dept { position: relative; display: grid; grid-template-rows: auto 1fr; background: var(--panel); border: 1px solid var(--line); overflow: hidden;
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%); }
+.dept:hover { border-color: #3a3150; }
+.dept .pic { aspect-ratio: 4 / 3; max-width: 100%; display: grid; place-items: center; overflow: hidden; position: relative; }
+.dept .pic img { width: 100%; height: 100%; object-fit: cover; }
+.dept .pic svg { width: 62%; height: auto; }
+.dept .txt { padding: 12px 14px 14px; display: grid; gap: 3px; align-content: start; }
+.dept b { font: 700 20px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; }
+.dept span { font-size: 13px; color: var(--muted); }
+.dept .live { color: var(--cyan); }
+.dept .soon { color: var(--amber); }
+.pic.merch { background: radial-gradient(90% 80% at 30% 20%, rgba(213, 36, 62, .35), transparent 60%), radial-gradient(90% 90% at 80% 90%, rgba(105, 47, 150, .45), transparent 60%), #0c0d14; }
+.pic.apps { background: radial-gradient(90% 80% at 70% 20%, rgba(105, 47, 150, .45), transparent 60%), radial-gradient(70% 80% at 20% 90%, rgba(56, 225, 255, .14), transparent 60%), #0c0d14; }
+.pic.more { background: conic-gradient(from 225deg at 50% 50%, rgba(213, 36, 62, .5), rgba(105, 47, 150, .5), rgba(213, 36, 62, .5)), #0c0d14; }
+.pic.more img { width: 42%; height: auto; filter: drop-shadow(0 10px 24px rgba(0, 0, 0, .6)); }
+
+/* ---------- offers + game shelf ---------- */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); display: grid; grid-template-rows: auto 1fr; }
+.card:hover { border-color: #3a3150; }
+.card .cap { position: relative; aspect-ratio: 460 / 215; max-width: 100%; overflow: hidden; background: #000; }
+.card .cap img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.85); }
+.card .cap strong { position: absolute; inset: 0; display: grid; place-content: center; font: 900 22px/1 var(--game); letter-spacing: .08em; text-shadow: -2px 0 rgba(56, 225, 255, .8), 2px 0 rgba(255, 63, 143, .8), 0 0 18px #000; }
+.card .body { padding: 11px 12px 12px; display: grid; gap: 8px; align-content: start; }
+.card .name { font: 700 17px/1.1 var(--display); letter-spacing: .04em; }
+.card .meta { font-size: 12.5px; color: var(--muted); }
+.card .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card .promo { font: 700 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
+.card.blank { border-style: dashed; place-content: center; text-align: center; padding: 26px 18px; display: grid; gap: 6px; min-height: 100%; }
+.card.blank b { font: 700 16px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; }
+.card.blank span { color: var(--muted); font-size: 13px; }
+
+/* ---------- shelves still empty ---------- */
+.soon-shelf { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 0; background: var(--panel); border: 1px solid var(--line); overflow: hidden; }
+.soon-shelf .art { min-height: 190px; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 20px; }
+.soon-shelf .art svg { width: 30%; max-width: 120px; height: auto; }
+.soon-shelf .copy { padding: 20px 22px; display: grid; gap: 8px; align-content: center; }
+.soon-shelf .copy b { font: 700 22px/1.1 var(--display); letter-spacing: .08em; text-transform: uppercase; }
+.soon-shelf .copy p { margin: 0; color: #c9cedd; max-width: 52ch; }
+.soon-shelf .copy small { font: 400 12.5px/1 var(--mono); color: var(--amber); letter-spacing: .06em; }
+
+footer { border-top: 1px solid var(--line); }
+footer .in { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); padding-block: 20px 30px; display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center; font-size: 12.5px; color: var(--muted); }
+footer .in img { width: 22px; height: 22px; }
+
+@media (max-width: 960px) {
+  .featured { grid-template-columns: minmax(0, 1fr); }
+  .f-art { min-height: 0; aspect-ratio: 16 / 9; }
+  .depts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .nav { display: none; }
+  .search { flex: 1 1 100%; order: 3; }
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .soon-shelf { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<div class="bar">
+  <div class="bar-in">
+    <a class="brand" href="#top" aria-label="RougeChain Store home"><img src="img/rougechain.png" alt=""><span><b>ROUGECHAIN</b> STORE</span></a>
+    <nav class="nav" aria-label="Departments">
+      <a href="#games">Games</a><a href="#merch">Merch</a><a href="#apps">Apps</a><a href="#more">More</a>
+    </nav>
+    <div class="search" role="search">
+      <label class="visually-hidden" for="q">Search the store</label>
+      <input id="q" type="search" placeholder="Search the store" autocomplete="off">
+      <div class="results" id="results" hidden></div>
+    </div>
+    <div class="bar-right">
+      <a class="pill-btn" id="wishlist-top" href="gltch-runner.html#wish">Wishlist <span class="count" id="wish-count">0</span></a>
+      <button class="pill-btn" id="cart-top" type="button">Cart <span class="count" id="cart-count">0</span></button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap" id="top">
+  <section class="welcome" aria-labelledby="hello">
+    <h1 id="hello">Games, merch, apps <em>and more</em></h1>
+    <p>The RougeChain Technologies store. Our first game, Gltch Runner, is in Early Access, and the rest of the shelves are filling up.</p>
+  </section>
+
+  <section aria-labelledby="feat-h">
+    <div class="shelf-head"><h2 id="feat-h">Featured</h2><span>Early Access</span></div>
+    <article class="featured">
+      <a class="f-art" href="gltch-runner.html" aria-label="Gltch Runner store page">
+        <img id="feat-img" src="img/kestrel-night.jpg" alt="Kestrel Block at night in the rain">
+        <span class="f-flag">Early Access</span>
+      </a>
+      <div class="f-side">
+        <a class="word" href="gltch-runner.html">GLTCH RUNNER</a>
+        <p>A cyberpunk shooter set in Kestrel Block. You wake with eleven days cut out of your memory, and every contract takes you somewhere new to win one back.</p>
+        <div class="minis" id="minis"></div>
+        <div class="tags"><span>Early Access</span><span>Cyberpunk</span><span>FPS</span><span>Story Rich</span><span>Parkour</span></div>
+        <div class="f-buy">
+          <a class="see" href="gltch-runner.html">See the game ›</a>
+          <div class="price-box" data-price="gltch-runner">
+            <div class="disc" aria-label="33 percent off">-33%</div>
+            <div class="price"><span class="was"><span class="visually-hidden">Was </span>$30.00</span><span class="now">$20.00</span></div>
+            <button class="btn buy" type="button" data-add="gltch-runner">Add to cart</button>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section aria-labelledby="dept-h">
+    <div class="shelf-head"><h2 id="dept-h">Browse</h2><span>4 departments</span></div>
+    <div class="depts">
+      <a class="dept" href="#games">
+        <div class="pic"><img src="img/neonrow-street.jpg" alt=""></div>
+        <div class="txt"><b>Games</b><span class="live">1 game · Gltch Runner</span></div>
+      </a>
+      <a class="dept" href="#merch">
+        <div class="pic merch" aria-hidden="true">
+          <svg viewBox="0 0 100 92"><path d="M30 6 L12 14 L2 34 L16 40 L22 30 L22 88 L78 88 L78 30 L84 40 L98 34 L88 14 L70 6 C66 14 58 18 50 18 C42 18 34 14 30 6 Z" fill="#f0f4f6" fill-opacity=".92"/><path d="M36 50 L64 50 M36 58 L58 58" stroke="#d5243e" stroke-width="4"/></svg>
+        </div>
+        <div class="txt"><b>Merch</b><span class="soon">Coming soon</span></div>
+      </a>
+      <a class="dept" href="#apps">
+        <div class="pic apps" aria-hidden="true">
+          <svg viewBox="0 0 100 80"><rect x="4" y="6" width="66" height="46" rx="4" fill="none" stroke="#f0f4f6" stroke-width="4"/><path d="M26 64 L48 64" stroke="#f0f4f6" stroke-width="4"/><rect x="62" y="20" width="32" height="56" rx="6" fill="#10121b" stroke="#9b5bd0" stroke-width="4"/><circle cx="78" cy="68" r="2.5" fill="#9b5bd0"/></svg>
+        </div>
+        <div class="txt"><b>Apps</b><span class="soon">Coming soon</span></div>
+      </a>
+      <a class="dept" href="#more">
+        <div class="pic more"><img src="img/rougechain.png" alt=""></div>
+        <div class="txt"><b>More</b><span class="soon">On the way</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section aria-labelledby="sale-h">
+    <div class="shelf-head"><h2 id="sale-h">Special offers</h2><span>1 offer</span></div>
+    <div class="cards">
+      <article class="card">
+        <a class="cap" href="gltch-runner.html"><img src="img/capsule.jpg" alt=""><strong>GLTCH RUNNER</strong></a>
+        <div class="body">
+          <span class="promo">Early Access launch sale</span>
+          <a class="name" href="gltch-runner.html">Gltch Runner</a>
+          <span class="meta">Windows · Early Access alpha</span>
+          <div class="row">
+            <div class="price-box" data-price="gltch-runner">
+              <div class="disc" aria-label="33 percent off">-33%</div>
+              <div class="price"><span class="was"><span class="visually-hidden">Was </span>$30.00</span><span class="now">$20.00</span></div>
+            </div>
+            <button class="btn buy" type="button" data-add="gltch-runner">Add to cart</button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="games" aria-labelledby="games-h">
+    <div class="shelf-head"><h2 id="games-h">Games</h2><span>1 in Early Access</span></div>
+    <div class="cards">
+      <article class="card">
+        <a class="cap" href="gltch-runner.html"><img src="img/kestrel-sunset.jpg" alt=""><strong>GLTCH RUNNER</strong></a>
+        <div class="body">
+          <a class="name" href="gltch-runner.html">Gltch Runner</a>
+          <span class="meta">Cyberpunk FPS · story and arenas · Windows</span>
+          <div class="row">
+            <div class="price-box" data-price="gltch-runner">
+              <div class="disc" aria-label="33 percent off">-33%</div>
+              <div class="price"><span class="was"><span class="visually-hidden">Was </span>$30.00</span><span class="now">$20.00</span></div>
+            </div>
+            <a class="btn" href="gltch-runner.html">View</a>
+          </div>
+        </div>
+      </article>
+      <div class="card blank"><b>More games</b><span>RougeChain's next games will show up here.</span></div>
+    </div>
+  </section>
+
+  <section id="merch" aria-labelledby="merch-h">
+    <div class="shelf-head"><h2 id="merch-h">Merch</h2><span>Coming soon</span></div>
+    <div class="soon-shelf">
+      <div class="art pic merch" aria-hidden="true">
+        <svg viewBox="0 0 100 92"><path d="M30 6 L12 14 L2 34 L16 40 L22 30 L22 88 L78 88 L78 30 L84 40 L98 34 L88 14 L70 6 C66 14 58 18 50 18 C42 18 34 14 30 6 Z" fill="#f0f4f6" fill-opacity=".9"/><path d="M36 50 L64 50 M36 58 L58 58" stroke="#d5243e" stroke-width="4"/></svg>
+        <svg viewBox="0 0 100 100"><path d="M34 8 C40 4 60 4 66 8 L88 22 L98 46 L84 52 L80 44 L80 94 L20 94 L20 44 L16 52 L2 46 L12 22 Z" fill="#692f96"/><path d="M38 8 C38 24 62 24 62 8" fill="none" stroke="#f0f4f6" stroke-width="4"/><rect x="36" y="56" width="28" height="16" fill="none" stroke="#f0f4f6" stroke-width="3"/></svg>
+      </div>
+      <div class="copy">
+        <small>COMING SOON</small>
+        <b>RougeChain and Gltch Runner merch</b>
+        <p>Merch is on its way to the store. When it lands it will be on this shelf, and in your cart beside the games.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="apps" aria-labelledby="apps-h">
+    <div class="shelf-head"><h2 id="apps-h">Apps</h2><span>Coming soon</span></div>
+    <div class="soon-shelf">
+      <div class="art pic apps" aria-hidden="true">
+        <svg viewBox="0 0 100 80"><rect x="4" y="6" width="66" height="46" rx="4" fill="none" stroke="#f0f4f6" stroke-width="4"/><path d="M26 64 L48 64" stroke="#f0f4f6" stroke-width="4"/><rect x="62" y="20" width="32" height="56" rx="6" fill="#10121b" stroke="#9b5bd0" stroke-width="4"/><circle cx="78" cy="68" r="2.5" fill="#9b5bd0"/></svg>
+      </div>
+      <div class="copy">
+        <small>COMING SOON</small>
+        <b>Apps from RougeChain</b>
+        <p>Apps for desktop and phone are coming to the store. Watch this shelf.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="more" aria-labelledby="more-h">
+    <div class="shelf-head"><h2 id="more-h">And more</h2><span>On the way</span></div>
+    <div class="soon-shelf">
+      <div class="art pic more"><img src="img/rougechain.png" alt="RougeChain logo" style="width:96px"></div>
+      <div class="copy">
+        <small>ON THE WAY</small>
+        <b>Whatever RougeChain makes next</b>
+        <p>The store will carry everything RougeChain Technologies puts out. New departments open here first.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="in">
+    <img src="img/rougechain.png" alt="">
+    <span>© 2026 RougeChain Technologies</span>
+    <span>Prices in US dollars</span>
+    <span data-contact></span>
+    <span data-legal></span>
+  </div>
+</footer>
+
+<script src="store-config.js"></script>
+<script src="store.js"></script>
+<script>
+(function () {
+  // the store's search: products and departments
+  var INDEX = [
+    { t: "Gltch Runner", s: "Game · Early Access" + (window.RC ? " · $" + (window.RC.products["gltch-runner"].now / 100).toFixed(2) : ""), href: "gltch-runner.html", k: "gltch runner game fps cyberpunk early access shooter kestrel" },
+    { t: "Games", s: "Department", href: "#games", k: "games game" },
+    { t: "Merch", s: "Department · coming soon", href: "#merch", k: "merch shirt tee hoodie clothes" },
+    { t: "Apps", s: "Department · coming soon", href: "#apps", k: "apps app software" },
+    { t: "And more", s: "Coming soon", href: "#more", k: "more other" }
+  ];
+  var SHOTS = ["kestrel-night", "neonrow-street", "nexus-lobby", "coldline-platform"];
+
+  // ---- featured: four shots of the game
+  var minis = document.getElementById("minis");
+  var feat = document.getElementById("feat-img");
+  SHOTS.forEach(function (s, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.setAttribute("aria-label", "Show screenshot " + (i + 1));
+    b.setAttribute("aria-current", i === 0 ? "true" : "false");
+    b.innerHTML = '<img src="img/' + s + '-t.jpg" alt="">';
+    b.addEventListener("click", function () {
+      feat.style.opacity = 0;
+      var next = new Image();
+      next.onload = next.onerror = function () { feat.src = next.src; feat.style.opacity = 1; };
+      next.src = "img/" + s + ".jpg";
+      Array.prototype.forEach.call(minis.children, function (c, k) { c.setAttribute("aria-current", k === i ? "true" : "false"); });
+    });
+    minis.appendChild(b);
+  });
+
+  // ---- search
+  var q = document.getElementById("q");
+  var results = document.getElementById("results");
+  function search() {
+    var v = q.value.trim().toLowerCase();
+    if (!v) { results.hidden = true; return; }
+    var hits = INDEX.filter(function (e) { return (e.t + " " + e.k).toLowerCase().indexOf(v) >= 0; });
+    results.innerHTML = "";
+    if (!hits.length) {
+      var p = document.createElement("p"); p.textContent = "Nothing called \u201c" + q.value.trim() + "\u201d yet."; results.appendChild(p);
+    }
+    hits.forEach(function (e) {
+      var a = document.createElement("a"); a.href = e.href; a.textContent = e.t;
+      var sm = document.createElement("small"); sm.textContent = e.s; a.appendChild(sm);
+      a.addEventListener("click", function () { results.hidden = true; q.value = ""; });
+      results.appendChild(a);
+    });
+    results.hidden = false;
+  }
+  q.addEventListener("input", search);
+  q.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { q.value = ""; results.hidden = true; }
+    if (e.key === "Enter") { var first = results.querySelector("a"); if (first) first.click(); }
+  });
+  document.addEventListener("click", function (e) { if (!e.target.closest(".search")) results.hidden = true; });
+})();
+</script>
+</body>
+</html>
