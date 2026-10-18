@@ -20,6 +20,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RC Store">
+<script src="i18n.js"></script>
 <style>
 /* Layout: the store's front window. Store bar; the featured game as one wide card; the four
    departments as tiles cut on the logo's diagonal; the one live offer; then each department's shelf,
@@ -352,6 +353,7 @@ footer .in img { width: 22px; height: 22px; }
     <span>Prices in US dollars</span>
     <span data-contact></span>
     <span data-legal></span>
+    <span data-langs></span>
   </div>
 </footer>
 
@@ -361,22 +363,25 @@ footer .in img { width: 22px; height: 22px; }
 <script src="app.js"></script>
 <script>
 (function () {
+  var tr = window.I18N ? window.I18N.t : function (s, v) { return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in v ? v[k] : m; }) : s; };
   // the store's search: products and departments
   var INDEX = [
-    { t: "Gltch Runner", s: "Game · Early Access" + (window.RC ? " · $" + (window.RC.products["gltch-runner"].now / 100).toFixed(2) : ""), href: "gltch-runner.html", k: "gltch runner game fps cyberpunk early access shooter kestrel" },
-    { t: "Games", s: "Department", href: "#games", k: "games game" },
-    { t: "Merch", s: "Department · coming soon", href: "#merch", k: "merch shirt tee hoodie clothes" },
-    { t: "Apps", s: "Department · coming soon", href: "#apps", k: "apps app software" },
-    { t: "And more", s: "Coming soon", href: "#more", k: "more other" }
+    { t: "Gltch Runner", s: tr("Game · Early Access") + (window.RC ? " · $" + (window.RC.products["gltch-runner"].now / 100).toFixed(2) : ""), href: "gltch-runner.html", k: "gltch runner game fps cyberpunk early access shooter kestrel" },
+    { t: tr("Games"), s: tr("Department"), href: "#games", k: "games game" },
+    { t: tr("Merch"), s: tr("Department · coming soon"), href: "#merch", k: "merch shirt tee hoodie clothes" },
+    { t: tr("Apps"), s: tr("Department · coming soon"), href: "#apps", k: "apps app software" },
+    { t: tr("And more"), s: tr("Coming soon"), href: "#more", k: "more other" }
   ];
   var SHOTS = ["kestrel-night", "neonrow-street", "nexus-lobby", "coldline-platform"];
+  // search finds the English words and the reader's own
+  INDEX.forEach(function (e) { e.k += " " + tr(e.k); });
 
   // ---- featured: four shots of the game
   var minis = document.getElementById("minis");
   var feat = document.getElementById("feat-img");
   SHOTS.forEach(function (s, i) {
     var b = document.createElement("button");
-    b.type = "button"; b.setAttribute("aria-label", "Show screenshot " + (i + 1));
+    b.type = "button"; b.setAttribute("aria-label", tr("Show screenshot {n}", { n: i + 1 }));
     b.setAttribute("aria-current", i === 0 ? "true" : "false");
     b.innerHTML = '<img src="img/' + s + '-t.jpg" alt="">';
     b.addEventListener("click", function () {
@@ -398,7 +403,7 @@ footer .in img { width: 22px; height: 22px; }
     var hits = INDEX.filter(function (e) { return (e.t + " " + e.k).toLowerCase().indexOf(v) >= 0; });
     results.innerHTML = "";
     if (!hits.length) {
-      var p = document.createElement("p"); p.textContent = "Nothing called \u201c" + q.value.trim() + "\u201d yet."; results.appendChild(p);
+      var p = document.createElement("p"); p.textContent = tr("Nothing called “{q}” yet.", { q: q.value.trim() }); results.appendChild(p);
     }
     hits.forEach(function (e) {
       var a = document.createElement("a"); a.href = e.href; a.textContent = e.t;

@@ -6,7 +6,7 @@
 // same account once both are linked. The account also keeps the wishlist and follows.
 //
 //   GET  /api/account                 who is signed in: { account | null, methods, chainId }
-//   POST /api/auth/email/code         { email }                          emails a 6-digit code
+//   POST /api/auth/email/code         { email, lang? }                   emails a 6-digit code (lang: en, es, ru)
 //   POST /api/auth/email/verify       { email, code, password?, intent? } signs in (or links), sets a password
 //   POST /api/auth/email/password     { email, password }                signs in with a password
 //   POST /api/auth/wallet/challenge   { publicKey, intent? }             the sign-in message to sign
@@ -21,7 +21,7 @@
 
 import { createSignInMessage, parseSignInMessage, pubkeyToAddress, verifySignIn } from "@rougechain/sdk";
 import { randomBytes } from "node:crypto";
-import { sendCode } from "./email.mjs";
+import { EMAIL_LANGS, sendCode } from "./email.mjs";
 import { COOKIE, HttpError, SESSION_MS, clearedCookie, json, readCookie, readJson, sessionCookie } from "./http.mjs";
 import * as S from "./secrets.mjs";
 import { blobStore } from "./store.mjs";
@@ -225,7 +225,7 @@ async function emailCode(x) {
   const code = S.newCode();
   await x.db.put(key, { id: S.newId(""), h: S.codeHash(await codeSecret(x), email, code), exp: x.now() + CODE_MS, sentAt: x.now() });
   try {
-    await x.mail({ to: email, code });
+    await x.mail({ to: email, code, lang: EMAIL_LANGS.includes(x.body.lang) ? x.body.lang : "en" });
   } catch (e) {
     await x.db.remove(key);
     throw e;

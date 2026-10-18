@@ -12,12 +12,13 @@ public/
   store-config.js     THE FILE YOU EDIT: Stripe links, email signup, contact, policy links
   store.js            prices, cart, checkout, wishlist (prices live in PRODUCTS at the top)
   account.js          the Sign in button and account panel (email, password, RougeChain wallet)
+  i18n.js             Spanish and Russian: picks the language and holds every translation
   app.js, app.css     the store as an app: tab bar, sheets, swipes, install hint (phones)
   sw.js               the service worker: installable, opens offline
   manifest.webmanifest  the app's name, icons, colours and shortcuts
   offline.html        shown for a page the app hasn't saved yet, without a connection
   icons/              app icons (Kestrel Block at night, from img/kestrel-night.jpg), the R favicon, install screenshots
-  fonts/              the game's typefaces, served from the site itself (SIL Open Font License)
+  fonts/              the game's typefaces, plus Cyrillic companions for Russian (SIL Open Font License)
   img/                screenshots, weapon renders, the RougeChain logo
 netlify/
   functions/api.mjs   the accounts API, served at /api/*
@@ -202,3 +203,30 @@ never opened shows `offline.html`. Sign-in (`/api/*`) and Stripe are never cache
 
 When you add a page or a file the app should keep offline, add it to `SHELL` in `public/sw.js`
 and raise `VERSION`. `netlify.toml` serves `sw.js` uncached so updates reach installed copies.
+
+## Languages
+
+The store speaks **English, Spanish and Russian**. It picks the visitor's phone or browser language
+on its own; the footer has **English · Español · Русский** links, and `?lang=es` / `?lang=ru` /
+`?lang=en` on any address switches too. The choice is remembered.
+
+- The pages are written in English. `public/i18n.js` swaps each text, button, label and alt text
+  for its translation before the page shows, so nobody sees it change. The cart, wishlist, sign-in,
+  the app's tab bar and install card, the accounts server's messages and the sign-in code email
+  are translated too. Dates follow the language.
+- Names stay as they are: Gltch Runner, Kestrel Block, NEXUS, Dead Signal, the weapons and arenas,
+  XRGE. Prices stay in US dollars.
+- **Russian letters:** the game's typefaces have no Cyrillic, so `fonts/fonts.css` adds Exo 2 beside
+  Rajdhani, Russo One beside Orbitron and PT Mono beside Share Tech Mono, for Cyrillic letters
+  only (31 KB in all, downloaded only by pages with Russian on them).
+
+**Changing or adding text.** Add the English and its two translations to `T` in `public/i18n.js`:
+
+```js
+"Add to cart": ["Añadir al carrito", "В корзину"],
+```
+
+`npm test` reads every page, script and server message and fails with a list of any English that
+has no translation, so new text can't slip through untranslated. Text with a value in it uses a
+`{slot}`, the same in all three: `"{name} isn't on sale yet…"`. Spanish uses "tú"; Russian uses
+"вы".

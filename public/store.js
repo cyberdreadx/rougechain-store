@@ -9,6 +9,8 @@
 // tells Stripe which account is buying.
 (function () {
   var S = window.STORE || {};
+  // i18n.js translates; without it, the English with its {slots} filled
+  var t = window.I18N ? window.I18N.t : function (s, v) { return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in v ? v[k] : m; }) : s; };
 
   // ---- what the store sells (prices in cents)
   var PRODUCTS = {
@@ -75,29 +77,29 @@
   shell.innerHTML =
     '<div class="rc-scrim" hidden></div>' +
     '<section class="rc-panel rc-cart" role="dialog" aria-modal="true" aria-labelledby="rc-cart-h" hidden>' +
-      '<header><h2 id="rc-cart-h">Your cart</h2><button class="rc-x" type="button" aria-label="Close the cart">×</button></header>' +
+      '<header><h2 id="rc-cart-h">' + t("Your cart") + '</h2><button class="rc-x" type="button" aria-label="' + t("Close the cart") + '">×</button></header>' +
       '<div class="rc-lines"></div>' +
-      '<div class="rc-total"><div class="rc-row"><span>Estimated total</span><span class="rc-sum">—</span></div>' +
-      '<p class="rc-note"></p><button class="rc-go rc-pay" type="button">Continue to payment</button></div>' +
+      '<div class="rc-total"><div class="rc-row"><span>' + t("Estimated total") + '</span><span class="rc-sum">—</span></div>' +
+      '<p class="rc-note"></p><button class="rc-go rc-pay" type="button">' + t("Continue to payment") + '</button></div>' +
     '</section>' +
     '<section class="rc-panel rc-wishp" role="dialog" aria-modal="true" aria-labelledby="rc-wish-h" hidden>' +
-      '<header><h2 id="rc-wish-h">Wishlist</h2><button class="rc-x" type="button" aria-label="Close the wishlist">×</button></header>' +
+      '<header><h2 id="rc-wish-h">' + t("Wishlist") + '</h2><button class="rc-x" type="button" aria-label="' + t("Close the wishlist") + '">×</button></header>' +
       '<div class="rc-lines"></div>' +
     '</section>' +
     '<section class="rc-panel rc-notify" role="dialog" aria-modal="true" aria-labelledby="rc-notify-h" hidden>' +
-      '<header><h2 id="rc-notify-h">Get notified</h2><button class="rc-x" type="button" aria-label="Close">×</button></header>' +
+      '<header><h2 id="rc-notify-h">' + t("Get notified") + '</h2><button class="rc-x" type="button" aria-label="' + t("Close") + '">×</button></header>' +
       '<p class="rc-what"></p>' +
       '<form class="rc-form" method="post" target="_blank">' +
-        '<label for="rc-email">Email</label><input id="rc-email" type="email" required autocomplete="email" placeholder="you@example.com">' +
-        '<button class="rc-go" type="submit">Sign me up</button></form>' +
-      '<p class="rc-fine">We only use your address to tell you about RougeChain releases. Every email has an unsubscribe link.</p>' +
+        '<label for="rc-email">' + t("Email") + '</label><input id="rc-email" type="email" required autocomplete="email" placeholder="' + t("you@example.com") + '">' +
+        '<button class="rc-go" type="submit">' + t("Sign me up") + '</button></form>' +
+      '<p class="rc-fine">' + t("We only use your address to tell you about RougeChain releases. Every email has an unsubscribe link.") + '</p>' +
     '</section>';
   document.body.appendChild(shell);
   var scrim = shell.querySelector(".rc-scrim");
   var cart = shell.querySelector(".rc-cart");
   var notify = shell.querySelector(".rc-notify");
   var wishp = shell.querySelector(".rc-wishp");
-  if (S.privacyUrl) notify.querySelector(".rc-fine").insertAdjacentHTML("beforeend", ' <a href="' + esc(S.privacyUrl) + '">Privacy policy</a>');
+  if (S.privacyUrl) notify.querySelector(".rc-fine").insertAdjacentHTML("beforeend", ' <a href="' + esc(S.privacyUrl) + '">' + t("Privacy policy") + '</a>');
 
   // On a phone the panels are bottom sheets (app.css): they slide away when closed, and the page
   // behind them doesn't scroll. close(true) closes at once (app.js has already slid it away).
@@ -154,13 +156,13 @@
   // ---- the cart
   function paintCart() {
     var items = read("rc-cart"), lines = cart.querySelector(".rc-lines"), sum = 0;
-    lines.innerHTML = items.length ? "" : '<p class="rc-empty">Your cart is empty.</p>';
+    lines.innerHTML = items.length ? "" : '<p class="rc-empty">' + t("Your cart is empty.") + '</p>';
     items.forEach(function (id) {
       var p = PRODUCTS[id]; sum += p.now;
       var row = document.createElement("div");
       row.className = "rc-line";
-      row.innerHTML = '<img src="' + p.pic + '" alt=""><div><b>' + esc(p.name) + '</b><span>' + esc(p.kind) + '</span></div>' +
-        '<span class="rc-amt">' + (p.was > p.now ? '<s>' + money(p.was) + '</s>' : '') + money(p.now) + '</span><button class="rc-rm" type="button">Remove</button>';
+      row.innerHTML = '<img src="' + p.pic + '" alt=""><div><b>' + esc(p.name) + '</b><span>' + esc(t(p.kind)) + '</span></div>' +
+        '<span class="rc-amt">' + (p.was > p.now ? '<s>' + money(p.was) + '</s>' : '') + money(p.now) + '</span><button class="rc-rm" type="button">' + t("Remove") + '</button>';
       row.querySelector(".rc-rm").addEventListener("click", function () { put("rc-cart", id, false); paintCounts(); paintCart(); });
       lines.appendChild(row);
     });
@@ -168,9 +170,9 @@
     var pay = cart.querySelector(".rc-pay"), note = cart.querySelector(".rc-note");
     var live = items.length > 0 && items.every(function (id) { return link(id); });
     if (!items.length) { pay.disabled = true; note.textContent = ""; }
-    else if (!live) { pay.disabled = true; note.textContent = "Checkout isn't open yet. Until it is, keep things on your wishlist."; }
-    else if (items.length > 1) { pay.disabled = true; note.textContent = "For now, buy one item at a time."; }
-    else { pay.disabled = false; note.textContent = "You pay on Stripe's secure checkout page." + (window.RC && window.RC.account ? " The purchase is saved to your store account." : ""); }
+    else if (!live) { pay.disabled = true; note.textContent = t("Checkout isn't open yet. Until it is, keep things on your wishlist."); }
+    else if (items.length > 1) { pay.disabled = true; note.textContent = t("For now, buy one item at a time."); }
+    else { pay.disabled = false; note.textContent = t("You pay on Stripe's secure checkout page.") + (window.RC && window.RC.account ? " " + t("The purchase is saved to your store account.") : ""); }
   }
   function openCart(from) { paintCart(); open(cart, from); }
   // Signed in: Stripe gets the account id (it shows as the payment's client reference ID) and the email.
@@ -192,15 +194,15 @@
   // ---- the wishlist
   function paintWish() {
     var items = read("rc-wish"), lines = wishp.querySelector(".rc-lines");
-    lines.innerHTML = items.length ? "" : '<p class="rc-empty">Nothing saved yet. Tap ♡ Add to wishlist on a game to keep it here.</p>';
+    lines.innerHTML = items.length ? "" : '<p class="rc-empty">' + t("Nothing saved yet. Tap ♡ Add to wishlist on a game to keep it here.") + '</p>';
     items.forEach(function (id) {
       var p = PRODUCTS[id];
       var row = document.createElement("div");
       row.className = "rc-line";
-      row.innerHTML = '<a href="' + p.page + '"><img src="' + p.pic + '" alt=""></a><a href="' + p.page + '"><b>' + esc(p.name) + '</b><span>' + esc(p.kind) + '</span></a>' +
+      row.innerHTML = '<a href="' + p.page + '"><img src="' + p.pic + '" alt=""></a><a href="' + p.page + '"><b>' + esc(p.name) + '</b><span>' + esc(t(p.kind)) + '</span></a>' +
         '<span class="rc-amt">' + (p.was > p.now ? '<s>' + money(p.was) + '</s>' : '') + money(p.now) + '</span>' +
-        '<div class="rc-acts"><button class="rc-wish-add" type="button">' + (mode(id) === "notify" ? "Get notified" : "Add to cart") + '</button>' +
-        '<button class="rc-rm" type="button">Remove</button></div>';
+        '<div class="rc-acts"><button class="rc-wish-add" type="button">' + t(mode(id) === "notify" ? "Get notified" : "Add to cart") + '</button>' +
+        '<button class="rc-rm" type="button">' + t("Remove") + '</button></div>';
       row.querySelector(".rc-wish-add").addEventListener("click", function () {
         if (mode(id) === "notify") { openNotify(id); return; }
         put("rc-cart", id, true); paintCounts(); openCart();
@@ -214,7 +216,7 @@
   // ---- signup, while a product isn't on sale
   function openNotify(id, from) {
     var form = notify.querySelector(".rc-form");
-    notify.querySelector(".rc-what").textContent = PRODUCTS[id].name + " isn't on sale yet. Leave your email and we'll tell you when it is.";
+    notify.querySelector(".rc-what").textContent = t("{name} isn't on sale yet. Leave your email and we'll tell you when it is.", { name: PRODUCTS[id].name });
     form.action = S.signupAction;
     form.querySelector("#rc-email").name = S.signupField || "email";
     form.querySelectorAll("input[type=hidden]").forEach(function (h) { h.remove(); });
@@ -230,13 +232,13 @@
   document.querySelectorAll("[data-price]").forEach(function (box) {
     var p = PRODUCTS[box.getAttribute("data-price")]; if (!p) return;
     var d = box.querySelector(".disc"), w = box.querySelector(".was"), n = box.querySelector(".now");
-    if (d) { d.hidden = !(p.was > p.now); d.textContent = "-" + off(p) + "%"; d.setAttribute("aria-label", off(p) + " percent off"); }
-    if (w) { w.hidden = !(p.was > p.now); w.innerHTML = '<span class="visually-hidden">Was </span>' + money(p.was); }
+    if (d) { d.hidden = !(p.was > p.now); d.textContent = "-" + off(p) + "%"; d.setAttribute("aria-label", t("{n} percent off", { n: off(p) })); }
+    if (w) { w.hidden = !(p.was > p.now); w.innerHTML = '<span class="visually-hidden">' + t("Was") + ' </span>' + money(p.was); }
     if (n) n.textContent = money(p.now);
   });
   document.querySelectorAll("[data-add]").forEach(function (b) {
     var id = b.getAttribute("data-add"); if (!PRODUCTS[id]) return;
-    b.textContent = mode(id) === "notify" ? "Get notified" : "Add to cart";
+    b.textContent = t(mode(id) === "notify" ? "Get notified" : "Add to cart");
     b.addEventListener("click", function (e) {
       if (mode(id) === "notify") { openNotify(id, e.currentTarget); return; }
       put("rc-cart", id, true); paintCounts(); openCart(e.currentTarget);
@@ -244,13 +246,13 @@
   });
   document.querySelectorAll("[data-wish]").forEach(function (b) {
     var id = b.getAttribute("data-wish");
-    function paint() { var on = has("rc-wish", id); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "♥ On your wishlist" : "♡ Add to wishlist"; }
+    function paint() { var on = has("rc-wish", id); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = t(on ? "♥ On your wishlist" : "♡ Add to wishlist"); }
     b.addEventListener("click", function () { put("rc-wish", id, !has("rc-wish", id)); paint(); paintCounts(); listsChanged(); });
     painters.push(paint); paint();
   });
   document.querySelectorAll("[data-follow]").forEach(function (b) {
     var id = b.getAttribute("data-follow");
-    function paint() { var on = has("rc-follow", id); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "Following" : "Follow"; }
+    function paint() { var on = has("rc-follow", id); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = t(on ? "Following" : "Follow"); }
     b.addEventListener("click", function () { put("rc-follow", id, !has("rc-follow", id)); paint(); listsChanged(); });
     painters.push(paint); paint();
   });
@@ -261,13 +263,13 @@
 
   // ---- footer: contact and policies, where they are set
   document.querySelectorAll("[data-contact]").forEach(function (el) {
-    if (S.contactEmail) el.innerHTML = 'Contact: <a href="mailto:' + esc(S.contactEmail) + '">' + esc(S.contactEmail) + '</a>';
+    if (S.contactEmail) el.innerHTML = t("Contact:") + ' <a href="mailto:' + esc(S.contactEmail) + '">' + esc(S.contactEmail) + '</a>';
   });
   document.querySelectorAll("[data-legal]").forEach(function (el) {
     var parts = [];
-    if (S.termsUrl) parts.push('<a href="' + esc(S.termsUrl) + '">Terms</a>');
-    if (S.refundUrl) parts.push('<a href="' + esc(S.refundUrl) + '">Refunds</a>');
-    if (S.privacyUrl) parts.push('<a href="' + esc(S.privacyUrl) + '">Privacy</a>');
+    if (S.termsUrl) parts.push('<a href="' + esc(S.termsUrl) + '">' + t("Terms") + '</a>');
+    if (S.refundUrl) parts.push('<a href="' + esc(S.refundUrl) + '">' + t("Refunds") + '</a>');
+    if (S.privacyUrl) parts.push('<a href="' + esc(S.privacyUrl) + '">' + t("Privacy") + '</a>');
     el.innerHTML = parts.join(" · ");
   });
 

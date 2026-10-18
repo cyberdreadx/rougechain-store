@@ -58,8 +58,10 @@ html.rc-locked, html.rc-locked body { overflow: hidden; }
   :root .rc-form input, :root .search input { font-size: 16px; }
 
   /* ---- the game page's compact title, once its own title has scrolled away */
+  /* it floats over the bar's right side, so it never makes the bar taller */
   .rc-mini {
-    display: flex; align-items: center; gap: 10px; margin-left: auto; min-width: 0;
+    position: absolute; top: 0; bottom: 0; left: calc(var(--gutter-l, 16px) + 44px); right: var(--gutter-r, 16px);
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0;
     opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .18s ease, transform .18s ease;
   }
   .rc-mini.on { opacity: 1; transform: none; pointer-events: auto; }
@@ -117,3 +119,7 @@ html.rc-locked, html.rc-locked body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .rc-tabbar svg, .rc-mini { transition: none; }
 }
+
+/* ---- the footer's language links (i18n.js) */
+[data-langs] a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+[data-langs] a[aria-current] { color: var(--text, #f0f4f6); font-weight: 600; text-decoration: none; }
