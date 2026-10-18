@@ -135,7 +135,7 @@
     var n = view.querySelector("[data-msg]");
     if (message && n) note(n, message, "ok");
     var first = v.focus && $(v.focus);
-    (first || title).focus();
+    (first || title).focus({ preventScroll: true });
   }
 
   function walletButton() {
@@ -517,12 +517,13 @@
   }
   document.addEventListener("rc:lists", function () { clearTimeout(saveTimer); saveTimer = setTimeout(saveLists, 500); });
 
-  function openPanel() {
+  function openPanel(from) {
     show(account ? "account" : "start");
-    RC.panel.open(panel, top);
-    title.focus();
+    RC.panel.open(panel, from && from.nodeType ? from : top);
+    title.focus({ preventScroll: true });
   }
-  top.addEventListener("click", openPanel);
+  top.addEventListener("click", function () { openPanel(top); });
+  RC.openAccount = openPanel; // app.js's Account tab
 
   api("/account").then(function (d) {
     emailOn = !!(d.methods && d.methods.email);

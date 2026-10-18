@@ -2,10 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Thank you · RougeChain Store</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#07080d">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RC Store">
 <style>
 /* Where Stripe sends a buyer after paying (the Payment Link's confirmation redirect). */
 :root {
@@ -18,7 +27,7 @@
   padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; background: var(--ink); background-image: linear-gradient(135deg, rgba(213, 36, 62, .13) 0%, transparent 34%), linear-gradient(315deg, rgba(105, 47, 150, .16) 0%, transparent 38%); color: var(--text); font: 400 15px/1.55 var(--body); display: grid; place-items: center;
+body { margin: 0; min-height: 100vh; min-height: 100dvh; background: var(--ink); background-image: linear-gradient(135deg, rgba(213, 36, 62, .13) 0%, transparent 34%), linear-gradient(315deg, rgba(105, 47, 150, .16) 0%, transparent 38%); color: var(--text); font: 400 15px/1.55 var(--body); display: grid; place-items: center;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px; }
 [hidden] { display: none !important; }
 a { color: inherit; }
@@ -43,6 +52,7 @@ p { margin: 0; color: #c9cedd; }
 </main>
 <script src="store-config.js"></script>
 <script src="store.js"></script>
+<script src="app.js"></script>
 <script>
   // what was paid for is no longer in the cart
   if (window.RC) window.RC.clearCart();

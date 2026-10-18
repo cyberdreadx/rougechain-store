@@ -1,0 +1,119 @@
+/* RougeChain Store as an app: what every page shares on a phone. app.js adds the pieces.
+   On a phone (760px and narrower): a bottom tab bar instead of the store bar's buttons, panels as
+   bottom sheets you can swipe down, a compact title on the game page, press feedback, 16px inputs
+   (so iOS doesn't zoom), and smooth page-to-page transitions where the browser has them.
+   Rules that change store.js's panels start with :root, so they win over its styles. */
+
+html { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+html.rc-locked, html.rc-locked body { overflow: hidden; }
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+
+.rc-tabbar, .rc-mini, .rc-install { display: none; }
+
+@media (max-width: 760px) {
+  html body { padding-bottom: 62px; }
+  .bar .bar-right, .bar .nav { display: none !important; }
+
+  /* ---- the tab bar */
+  .rc-tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    background: rgba(9, 10, 16, .94); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3);
+    border-top: 1px solid var(--line, #252839);
+    -webkit-user-select: none; user-select: none;
+  }
+  .rc-tabbar > * {
+    position: relative; display: grid; justify-items: center; align-content: center; gap: 4px; height: 62px; padding: 0;
+    border: 0; background: none; color: var(--muted, #9095a8); text-decoration: none; cursor: pointer;
+    font: 600 11px/1 var(--ui, var(--display, "Rajdhani", sans-serif)); letter-spacing: .08em; text-transform: uppercase;
+  }
+  .rc-tabbar > *:hover { text-decoration: none; }
+  .rc-tabbar svg { width: 24px; height: 24px; transition: transform .12s ease; }
+  .rc-tabbar > *:active svg { transform: scale(.86); }
+  .rc-tabbar [aria-current="page"] { color: var(--text, #f0f4f6); }
+  .rc-tabbar [aria-current="page"]::before { content: ""; position: absolute; top: -1px; left: 32%; right: 32%; height: 2px; background: var(--crimson, #d5243e); }
+  .rc-badge {
+    position: absolute; top: 8px; left: calc(50% + 5px); min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
+    background: var(--crimson, #d5243e); color: #fff; font: 700 11px/17px var(--mono, monospace); letter-spacing: 0; text-align: center;
+  }
+  .rc-badge[data-n="0"], .rc-badge:empty { display: none; }
+
+  /* ---- panels become bottom sheets */
+  :root .rc-panel {
+    top: auto; left: 0; right: 0; bottom: 0; width: 100%;
+    max-height: calc(100% - 44px - env(safe-area-inset-top, 0px));
+    border-left: 0; border-top: 1px solid var(--line, #252839); border-radius: 18px 18px 0 0;
+    padding-top: 28px; padding-left: max(18px, env(safe-area-inset-left, 0px));
+    box-shadow: 0 -24px 48px rgba(0, 0, 0, .55);
+    overscroll-behavior: contain;
+  }
+  :root .rc-panel::before {
+    content: ""; position: absolute; top: 9px; left: 50%; width: 38px; height: 5px; margin-left: -19px;
+    border-radius: 3px; background: rgba(255, 255, 255, .2);
+  }
+  :root .rc-panel h2 { font-size: 18px; }
+  :root .rc-form input, :root .search input { font-size: 16px; }
+
+  /* ---- the game page's compact title, once its own title has scrolled away */
+  .rc-mini {
+    display: flex; align-items: center; gap: 10px; margin-left: auto; min-width: 0;
+    opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .18s ease, transform .18s ease;
+  }
+  .rc-mini.on { opacity: 1; transform: none; pointer-events: auto; }
+  .rc-mini b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 800 14px/1 var(--display, "Rajdhani", sans-serif); letter-spacing: .08em; }
+  .rc-mini button {
+    flex: 0 0 auto; border: 0; border-radius: 999px; padding: 8px 13px; cursor: pointer; color: #fff;
+    background: linear-gradient(135deg, var(--crimson, #d5243e), #692f96);
+    font: 700 13px/1 var(--ui, var(--display, "Rajdhani", sans-serif)); letter-spacing: .06em; text-transform: uppercase;
+  }
+  .bar-in.rc-mini-on .brand span { display: none; }
+
+  /* ---- "get the app", shown once */
+  .rc-install {
+    position: fixed; left: 10px; right: 10px; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); z-index: 29;
+    display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 12px;
+    background: var(--panel-hi, #171a27); border: 1px solid var(--line, #252839); border-radius: 14px; box-shadow: 0 14px 34px rgba(0, 0, 0, .55);
+  }
+  .rc-install[hidden] { display: none; }
+  .rc-install img { width: 38px; height: 38px; border-radius: 10px; flex: 0 0 38px; }
+  .rc-install p { flex: 1; min-width: 0; margin: 0; font-size: 13px; line-height: 1.35; color: var(--muted, #9095a8); }
+  .rc-install p b { display: block; color: var(--text, #f0f4f6); font: 700 15px/1.2 var(--ui, var(--display, "Rajdhani", sans-serif)); letter-spacing: .04em; }
+  .rc-install p svg { width: 14px; height: 14px; vertical-align: -2px; }
+  .rc-install .rc-get {
+    border: 0; border-radius: 999px; padding: 9px 14px; cursor: pointer; color: #fff; background: linear-gradient(135deg, var(--crimson, #d5243e), #692f96);
+    font: 700 13px/1 var(--ui, var(--display, "Rajdhani", sans-serif)); letter-spacing: .06em; text-transform: uppercase;
+  }
+  .rc-install .rc-nope { border: 0; background: none; color: var(--muted, #9095a8); width: 34px; height: 34px; font: 400 20px/1 var(--mono, monospace); cursor: pointer; }
+}
+
+@media (max-width: 760px) and (prefers-reduced-motion: no-preference) {
+  :root .rc-panel:not([hidden]) { animation: rc-sheet-in .32s cubic-bezier(.2, .9, .25, 1); }
+  :root .rc-panel.rc-closing { animation: rc-sheet-out .22s cubic-bezier(.4, 0, 1, 1) forwards; }
+  :root .rc-scrim:not([hidden]) { animation: rc-fade-in .25s ease; }
+  :root .rc-scrim.rc-closing { animation: rc-fade-out .22s ease forwards; }
+  .rc-install:not([hidden]) { animation: rc-rise .3s cubic-bezier(.2, .9, .25, 1); }
+}
+@keyframes rc-sheet-in { from { transform: translateY(100%); } }
+@keyframes rc-sheet-out { to { transform: translateY(100%); } }
+@keyframes rc-fade-in { from { opacity: 0; } }
+@keyframes rc-fade-out { to { opacity: 0; } }
+@keyframes rc-rise { from { opacity: 0; transform: translateY(16px); } }
+
+/* ---- touch: press feedback instead of hover */
+@media (hover: none) {
+  .btn, .pill-btn, .rc-go, .rc-wallet, .rc-x, .rc-wish-add, .dept, .f-art, .card .cap, .thumb, .minis button, .rc-arow {
+    transition: transform .12s ease, filter .12s ease, background-color .12s ease;
+  }
+  .btn:active, .pill-btn:active, .rc-go:active, .rc-wallet:active, .rc-x:active, .rc-wish-add:active, .rc-mini button:active, .rc-install .rc-get:active { transform: scale(.96); filter: brightness(1.15); }
+  .dept:active, .f-art:active, .card .cap:active { transform: scale(.985); }
+  .thumb:active, .minis button:active { transform: scale(.95); }
+  .rc-arow:active { background-color: rgba(255, 255, 255, .06); }
+  .featured:hover .f-art img { transform: none; }
+  .stage .arrow { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rc-tabbar svg, .rc-mini { transition: none; }
+}

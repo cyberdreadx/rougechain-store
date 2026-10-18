@@ -2,10 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>RougeChain Store</title>
 <meta name="description" content="RougeChain Technologies' store: games, merch, apps and more. Gltch Runner is in Early Access.">
 <link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#07080d">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RC Store">
 <style>
 /* Layout: the store's front window. Store bar; the featured game as one wide card; the four
    departments as tiles cut on the logo's diagonal; the one live offer; then each department's shelf,
@@ -185,7 +194,7 @@ footer .in img { width: 22px; height: 22px; }
       <div class="results" id="results" hidden></div>
     </div>
     <div class="bar-right">
-      <a class="pill-btn" id="wishlist-top" href="gltch-runner.html#wish">Wishlist <span class="count" id="wish-count">0</span></a>
+      <button class="pill-btn" id="wishlist-top" type="button">Wishlist <span class="count" id="wish-count">0</span></button>
       <button class="pill-btn" id="cart-top" type="button">Cart <span class="count" id="cart-count">0</span></button>
     </div>
   </div>
@@ -344,6 +353,7 @@ footer .in img { width: 22px; height: 22px; }
 <script src="store-config.js"></script>
 <script src="store.js"></script>
 <script src="account.js"></script>
+<script src="app.js"></script>
 <script>
 (function () {
   // the store's search: products and departments

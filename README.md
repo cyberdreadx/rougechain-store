@@ -12,6 +12,11 @@ public/
   store-config.js     THE FILE YOU EDIT: Stripe links, email signup, contact, policy links
   store.js            prices, cart, checkout, wishlist (prices live in PRODUCTS at the top)
   account.js          the Sign in button and account panel (email, password, RougeChain wallet)
+  app.js, app.css     the store as an app: tab bar, sheets, swipes, install hint (phones)
+  sw.js               the service worker: installable, opens offline
+  manifest.webmanifest  the app's name, icons, colours and shortcuts
+  offline.html        shown for a page the app hasn't saved yet, without a connection
+  icons/              app icons and the install screenshots
   fonts/              the game's typefaces, served from the site itself (SIL Open Font License)
   img/                screenshots, weapon renders, the RougeChain logo
 netlify/
@@ -167,3 +172,33 @@ npm test                   # the API's tests: email, passwords, wallet signature
 
 Under `netlify dev` without `RESEND_API_KEY`, sign-in codes are printed in the terminal instead of
 emailed.
+
+## The store as an app
+
+The store installs to a phone's home screen or a computer's dock and opens like an app: full screen,
+its own icon, no browser bars.
+
+- **Android, Chrome, Edge:** the browser offers to install it. On a phone, the store also shows a
+  small "Get the app" card once, from the second visit, with an **Install** button.
+- **iPhone, iPad:** Safari's Share > Add to Home Screen. The same card says so, once.
+- **Shortcuts** (long-press the icon on Android): Gltch Runner, Your cart, Your wishlist.
+
+On a phone (760px and narrower) the store works like an app:
+
+- a **tab bar** at the bottom: Store, Wishlist (with a count), Cart (with a count), Account. It
+  replaces the store bar's buttons on phones; on a computer nothing changes.
+- the cart, wishlist, sign-in and signup open as **bottom sheets**: swipe one down to close it, or
+  tap outside. The page behind doesn't scroll.
+- **swipe** the screenshots on the game page and the featured game on the homepage.
+- on the game page, once its title scrolls away, the bar shows **GLTCH RUNNER · Add · $20.00**,
+  until the real buy box is on screen.
+- buttons press in when tapped, Android gives a light buzz when something is added, inputs are
+  16px so iOS doesn't zoom, and pages fade into each other where the browser supports it.
+
+**Offline.** `sw.js` saves the pages, scripts, styles, logo and thumbnails when the app is first
+opened, and images as they're viewed. Pages and scripts always come from the network first, so a
+deploy is live on the next load. Without a connection the saved copy opens, and a page that was
+never opened shows `offline.html`. Sign-in (`/api/*`) and Stripe are never cached.
+
+When you add a page or a file the app should keep offline, add it to `SHELL` in `public/sw.js`
+and raise `VERSION`. `netlify.toml` serves `sw.js` uncached so updates reach installed copies.
