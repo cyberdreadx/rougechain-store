@@ -18,6 +18,10 @@
   var QWALLA_URL = "https://qwalla.io";
   var PHONE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
   var account = null, emailOn = true, email = "", lastSent = null, flash = null;
+  // i18n.js translates; without it, the English with its {slots} filled
+  var t = window.I18N ? window.I18N.t : function (s, v) { return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in v ? v[k] : m; }) : s; };
+  var LANG = window.I18N ? window.I18N.lang : "en";
+  var gap = window.I18N ? window.I18N.gap : function () { return " "; };
 
   // ---- styles (the page's colours where it has them, like store.js)
   var UI = "var(--ui,var(--display,'Rajdhani',sans-serif))";
@@ -71,7 +75,7 @@
 
   // ---- the store bar button and the panel
   var top = document.createElement("button");
-  top.className = "pill-btn"; top.id = "account-top"; top.type = "button"; top.hidden = true; top.textContent = "Sign in";
+  top.className = "pill-btn"; top.id = "account-top"; top.type = "button"; top.hidden = true; top.textContent = t("Sign in");
   bar.appendChild(top);
 
   var panel = document.createElement("section");
@@ -79,8 +83,8 @@
   panel.setAttribute("role", "dialog"); panel.setAttribute("aria-modal", "true"); panel.setAttribute("aria-labelledby", "rc-acct-h");
   panel.hidden = true;
   panel.innerHTML =
-    '<header><button class="rc-back" type="button" aria-label="Back" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg></button>' +
-    '<h2 id="rc-acct-h" tabindex="-1">Sign in</h2><button class="rc-x" type="button" aria-label="Close">×</button></header>' +
+    '<header><button class="rc-back" type="button" aria-label="' + t("Back") + '" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg></button>' +
+    '<h2 id="rc-acct-h" tabindex="-1">' + t("Sign in") + '</h2><button class="rc-x" type="button" aria-label="' + t("Close") + '">×</button></header>' +
     '<div class="rc-view"></div>';
   RC.panel.mount(panel);
   var view = panel.querySelector(".rc-view"), title = panel.querySelector("h2"), back = panel.querySelector(".rc-back"), backTo = null;
@@ -97,7 +101,7 @@
     return fetch("/api" + path, opts).then(function (r) {
       return r.json().catch(function () { return null; }).then(function (d) {
         if (r.ok && d) return d;
-        var e = new Error((d && d.error) || "Something went wrong. Try again in a minute.");
+        var e = new Error(t((d && d.error) || "Something went wrong. Try again in a minute.")); // the server speaks English
         e.status = r.status; e.data = d || {};
         if (r.status === 401 && account && path.indexOf("/auth/") !== 0) { setAccount(null); if (!panel.hidden) show("start"); }
         throw e;
@@ -109,18 +113,18 @@
   function pref() { try { return JSON.parse(localStorage.getItem("rc-signin") || "null") || {}; } catch (e) { return {}; } }
   function setPref(p) { try { localStorage.setItem("rc-signin", JSON.stringify(p)); } catch (e) {} }
 
-  function note(el, text, kind) { if (!el) return; el.className = "rc-note" + (kind ? " rc-" + kind : ""); el.textContent = text || ""; }
+  function note(el, text, kind) { if (!el) return; el.className = "rc-note" + (kind ? " rc-" + kind : ""); el.textContent = text ? t(text) : ""; }
   function noteHtml(el, html, kind) { el.className = "rc-note" + (kind ? " rc-" + kind : ""); el.innerHTML = html; }
   function busy(btn, on, label) {
     if (!btn) return;
-    if (on) { btn.setAttribute("data-label", btn.innerHTML); if (label) btn.textContent = label; btn.disabled = true; }
+    if (on) { btn.setAttribute("data-label", btn.innerHTML); if (label) btn.textContent = t(label); btn.disabled = true; }
     else { btn.disabled = false; if (btn.hasAttribute("data-label")) btn.innerHTML = btn.getAttribute("data-label"); }
   }
 
   /** Emails a code, unless one went to the same address less than a minute ago (that one still works). */
   function sendCode(to, force) {
     if (!force && lastSent && lastSent.email === to && Date.now() - lastSent.at < 60000) return Promise.resolve();
-    return api("/auth/email/code", { email: to }).then(
+    return api("/auth/email/code", { email: to, lang: LANG }).then(
       function (d) { email = d.email; lastSent = { email: d.email, at: Date.now() }; },
       function (e) { if (!force && e.data.codeSent) { email = to; return; } throw e; });
   }
@@ -128,7 +132,7 @@
   // ---- the screens
   function show(name, message) {
     var v = VIEWS[name]();
-    title.textContent = v.title;
+    title.textContent = t(v.title);
     backTo = v.back || null; back.hidden = !backTo;
     view.innerHTML = v.html;
     if (v.wire) v.wire();
@@ -139,11 +143,11 @@
   }
 
   function walletButton() {
-    var label = !window.rougechain && PHONE ? "Continue with Qwalla" : "Continue with RougeChain wallet";
+    var label = t(!window.rougechain && PHONE ? "Continue with Qwalla" : "Continue with RougeChain wallet");
     return '<button class="rc-wallet" type="button" data-wallet><img src="icons/ring-64.png" alt=""><span>' + label + "</span></button>";
   }
   function codeField() {
-    return '<input class="rc-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" aria-label="6-digit code" required>';
+    return '<input class="rc-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" aria-label="' + t("6-digit code") + '" required>';
   }
   function username(value) {
     return '<input class="rc-hide" type="email" autocomplete="username" value="' + esc(value) + '" tabindex="-1" aria-hidden="true">';
@@ -154,16 +158,16 @@
       return {
         title: "Sign in",
         html:
-          '<p class="rc-lede">Sign in or create your store account.</p>' +
+          '<p class="rc-lede">' + t("Sign in or create your store account.") + '</p>' +
           walletButton() +
           '<p class="rc-note" data-wallet-note></p>' +
           (emailOn
-            ? '<div class="rc-or" aria-hidden="true">or</div>' +
+            ? '<div class="rc-or" aria-hidden="true">' + t("or") + '</div>' +
               '<form class="rc-form" data-email novalidate>' +
-                '<label for="rc-signin-email">Email</label>' +
-                '<input id="rc-signin-email" type="email" autocomplete="email" placeholder="you@example.com" value="' + esc(email || pref().email || "") + '">' +
+                '<label for="rc-signin-email">' + t("Email") + '</label>' +
+                '<input id="rc-signin-email" type="email" autocomplete="email" placeholder="' + t("you@example.com") + '" value="' + esc(email || pref().email || "") + '">' +
                 '<p class="rc-note" data-msg></p>' +
-                '<button class="rc-go" type="submit">Continue</button>' +
+                '<button class="rc-go" type="submit">' + t("Continue") + '</button>' +
               "</form>"
             : ""),
         wire: function () {
@@ -191,10 +195,10 @@
         back: "start",
         focus: ".rc-code",
         html:
-          '<p class="rc-lede">Enter the 6-digit code we sent to <b>' + esc(email) + "</b>.</p>" +
+          '<p class="rc-lede">' + t("Enter the 6-digit code we sent to {email}.", { email: "<b>" + esc(email) + "</b>" }) + "</p>" +
           '<form class="rc-form" data-check>' + codeField() + '<p class="rc-note" data-msg></p></form>' +
-          '<p class="rc-links"><button class="rc-link" type="button" data-resend>Send a new code</button>' +
-          '<button class="rc-link" type="button" data-use-password>Use password instead</button></p>',
+          '<p class="rc-links"><button class="rc-link" type="button" data-resend>' + t("Send a new code") + '</button>' +
+          '<button class="rc-link" type="button" data-use-password>' + t("Use password instead") + '</button></p>',
         wire: function () {
           codeInput($(".rc-code"), $("[data-msg]"), function (code) {
             return api("/auth/email/verify", { email: email, code: code }).then(function (d) {
@@ -218,13 +222,13 @@
         back: "start",
         focus: "#rc-pass",
         html:
-          '<p class="rc-lede">Signing in as <b>' + esc(email) + "</b>.</p>" +
+          '<p class="rc-lede">' + t("Signing in as {email}.", { email: "<b>" + esc(email) + "</b>" }) + "</p>" +
           '<form class="rc-form" data-password>' + username(email) +
-            '<label for="rc-pass">Password</label><input id="rc-pass" type="password" autocomplete="current-password" required>' +
+            '<label for="rc-pass">' + t("Password") + '</label><input id="rc-pass" type="password" autocomplete="current-password" required>' +
             '<p class="rc-note" data-msg></p>' +
-            '<button class="rc-go" type="submit">Sign in</button>' +
+            '<button class="rc-go" type="submit">' + t("Sign in") + '</button>' +
           "</form>" +
-          '<p class="rc-links"><button class="rc-link" type="button" data-use-code>Email me a code instead</button></p>',
+          '<p class="rc-links"><button class="rc-link" type="button" data-use-code>' + t("Email me a code instead") + '</button></p>',
         wire: function () {
           var form = $("[data-password]");
           form.addEventListener("submit", function (e) {
@@ -255,10 +259,10 @@
         title: "Your account",
         html:
           '<div class="rc-who"><b class="' + (a.email ? "" : "rc-mono") + '">' + esc(a.email || short(a.wallet.address)) + "</b>" +
-          "<span>Your wishlist, follows and purchases stay with this account.</span></div>" +
+          "<span>" + t("Your wishlist, follows and purchases stay with this account.") + "</span></div>" +
           '<div class="rc-alist">' + rows + "</div>" +
           '<p class="rc-note" data-msg></p>' +
-          '<p class="rc-links"><button class="rc-link" type="button" data-signout>Sign out</button></p>',
+          '<p class="rc-links"><button class="rc-link" type="button" data-signout>' + t("Sign out") + '</button></p>',
         wire: function () {
           var on = function (sel, fn) { var el = $(sel); if (el) el.addEventListener("click", fn); };
           on("[data-row=email]", function () { show(account.email ? "email" : "addEmail"); });
@@ -266,7 +270,7 @@
           on("[data-row=wallet]", function (e) {
             if (account.wallet) { show("wallet"); return; }
             var r = e.currentTarget;
-            walletGo("link", null, $("[data-msg]"), function (wait) { r.disabled = wait; r.querySelector(".v").textContent = wait ? "Check your wallet…" : "Add wallet"; });
+            walletGo("link", null, $("[data-msg]"), function (wait) { r.disabled = wait; r.querySelector(".v").textContent = t(wait ? "Check your wallet…" : "Add wallet"); });
           });
           $("[data-signout]").addEventListener("click", function () {
             api("/auth/signout", {}).then(function () {
@@ -286,9 +290,9 @@
         back: "account",
         html:
           '<p class="rc-lede"><b>' + esc(account.email) + "</b></p>" +
-          '<p class="rc-note">You can also sign in with your wallet, so this email can be removed. Removing it also removes your password.</p>' +
+          '<p class="rc-note">' + t("You can also sign in with your wallet, so this email can be removed. Removing it also removes your password.") + '</p>' +
           '<p class="rc-note" data-msg></p>' +
-          '<p class="rc-links"><button class="rc-link rc-danger" type="button" data-remove>Remove email</button></p>',
+          '<p class="rc-links"><button class="rc-link rc-danger" type="button" data-remove>' + t("Remove email") + '</button></p>',
         wire: function () { $("[data-remove]").addEventListener("click", function () { unlink("email"); }); }
       };
     },
@@ -299,9 +303,9 @@
         back: "account",
         html:
           '<p class="rc-full">' + esc(account.wallet.address) + "</p>" +
-          '<p class="rc-note">This RougeChain wallet signs you in. Signing in never moves funds.</p>' +
+          '<p class="rc-note">' + t("This RougeChain wallet signs you in. Signing in never moves funds.") + '</p>' +
           '<p class="rc-note" data-msg></p>' +
-          (account.email ? '<p class="rc-links"><button class="rc-link rc-danger" type="button" data-remove>Remove wallet</button></p>' : ""),
+          (account.email ? '<p class="rc-links"><button class="rc-link rc-danger" type="button" data-remove>' + t("Remove wallet") + '</button></p>' : ""),
         wire: function () { var r = $("[data-remove]"); if (r) r.addEventListener("click", function () { unlink("wallet"); }); }
       };
     },
@@ -313,9 +317,9 @@
         focus: "#rc-add-email",
         html:
           '<form class="rc-form" data-add novalidate>' +
-            '<label for="rc-add-email">Email</label><input id="rc-add-email" type="email" autocomplete="email" placeholder="you@example.com">' +
+            '<label for="rc-add-email">' + t("Email") + '</label><input id="rc-add-email" type="email" autocomplete="email" placeholder="' + t("you@example.com") + '">' +
             '<p class="rc-note" data-msg></p>' +
-            '<button class="rc-go" type="submit">Continue</button>' +
+            '<button class="rc-go" type="submit">' + t("Continue") + '</button>' +
           "</form>",
         wire: function () {
           var form = $("[data-add]");
@@ -336,7 +340,7 @@
         back: "addEmail",
         focus: ".rc-code",
         html:
-          '<p class="rc-lede">Enter the 6-digit code we sent to <b>' + esc(email) + "</b>.</p>" +
+          '<p class="rc-lede">' + t("Enter the 6-digit code we sent to {email}.", { email: "<b>" + esc(email) + "</b>" }) + "</p>" +
           '<form class="rc-form" data-check>' + codeField() + '<p class="rc-note" data-msg></p></form>',
         wire: function () {
           codeInput($(".rc-code"), $("[data-msg]"), function (code) {
@@ -354,13 +358,13 @@
         focus: has ? "#rc-cur" : "#rc-new",
         html:
           '<form class="rc-form" data-setpw>' + username(account.email) +
-            (has ? '<label for="rc-cur">Current password</label><input id="rc-cur" type="password" autocomplete="current-password" required>' : "") +
-            '<label for="rc-new">New password</label><input id="rc-new" type="password" autocomplete="new-password" minlength="10" required>' +
-            '<p class="rc-note">At least 10 characters.</p>' +
+            (has ? '<label for="rc-cur">' + t("Current password") + '</label><input id="rc-cur" type="password" autocomplete="current-password" required>' : "") +
+            '<label for="rc-new">' + t("New password") + '</label><input id="rc-new" type="password" autocomplete="new-password" minlength="10" required>' +
+            '<p class="rc-note">' + t("At least 10 characters.") + '</p>' +
             '<p class="rc-note" data-msg></p>' +
-            '<button class="rc-go" type="submit">Save password</button>' +
+            '<button class="rc-go" type="submit">' + t("Save password") + '</button>' +
           "</form>" +
-          (has ? '<p class="rc-links"><button class="rc-link" type="button" data-forgot>Forgot it? Reset it with an email code</button></p>' : ""),
+          (has ? '<p class="rc-links"><button class="rc-link" type="button" data-forgot>' + t("Forgot it? Reset it with an email code") + '</button></p>' : ""),
         wire: function () {
           var form = $("[data-setpw]");
           form.addEventListener("submit", function (e) {
@@ -386,11 +390,11 @@
         back: "password-set",
         focus: ".rc-code",
         html:
-          '<p class="rc-lede">Enter the code we sent to <b>' + esc(email) + "</b>, then your new password.</p>" +
+          '<p class="rc-lede">' + t("Enter the code we sent to {email}, then your new password.", { email: "<b>" + esc(email) + "</b>" }) + "</p>" +
           '<form class="rc-form" data-reset>' + username(email) + codeField() +
-            '<label for="rc-new">New password</label><input id="rc-new" type="password" autocomplete="new-password" minlength="10" required>' +
+            '<label for="rc-new">' + t("New password") + '</label><input id="rc-new" type="password" autocomplete="new-password" minlength="10" required>' +
             '<p class="rc-note" data-msg></p>' +
-            '<button class="rc-go" type="submit">Save password</button>' +
+            '<button class="rc-go" type="submit">' + t("Save password") + '</button>' +
           "</form>",
         wire: function () {
           var form = $("[data-reset]"), code = $(".rc-code");
@@ -409,7 +413,7 @@
   };
 
   function row(name, key, value, dim, clickable, mono) {
-    var inner = '<span class="k">' + key + '</span><span class="v' + (dim ? " rc-dim" : "") + (mono ? " rc-mono" : "") + '">' + esc(value) + "</span>";
+    var inner = '<span class="k">' + t(key) + '</span><span class="v' + (dim ? " rc-dim" : "") + (mono ? " rc-mono" : "") + '">' + esc(t(value)) + "</span>";
     return clickable
       ? '<button class="rc-arow" type="button" data-row="' + name + '">' + inner + '<span class="c" aria-hidden="true">›</span></button>'
       : '<div class="rc-arow">' + inner + "<span></span></div>";
@@ -447,7 +451,8 @@
     location.href = qwallaLink();
     setTimeout(function () {
       if (!left && document.visibilityState === "visible") {
-        noteHtml(msg, 'Qwalla didn\'t open. <a href="' + QWALLA_URL + '" target="_blank" rel="noopener">Get Qwalla</a> for iPhone or Android, then try again.');
+        var a = t("Qwalla didn't open."), b = t("Get Qwalla"), c = t("for iPhone or Android, then try again.");
+        noteHtml(msg, a + gap(a, b) + '<a href="' + QWALLA_URL + '" target="_blank" rel="noopener">' + b + "</a>" + gap(b, c) + c);
       }
     }, 1800);
   }
@@ -466,7 +471,10 @@
     note(msg, "");
     if (!p || !p.isRougeChain) {
       if (PHONE) { openQwalla(msg); return; }
-      noteHtml(msg, 'Add the <a href="' + WALLET_URL + '" target="_blank" rel="noopener">RougeChain Wallet extension</a> to Chrome, Edge or Brave, or use <a href="' + QWALLA_URL + '" target="_blank" rel="noopener">Qwalla Browser</a>. Then reload this page.');
+      noteHtml(msg, t("Add the {ext} to Chrome, Edge or Brave, or use {qwalla}. Then reload this page.", {
+        ext: '<a href="' + WALLET_URL + '" target="_blank" rel="noopener">' + t("RougeChain Wallet extension") + "</a>",
+        qwalla: '<a href="' + QWALLA_URL + '" target="_blank" rel="noopener">Qwalla Browser</a>'
+      }));
       return;
     }
     if (typeof p.signMessage !== "function") { note(msg, "Update your wallet to sign in (RougeChain Wallet 1.8 or later, or the latest Qwalla), then reload this page."); return; }
@@ -500,7 +508,7 @@
   /** The store bar button's text; `text` shows for a moment, then it goes back to Sign in / Account. */
   function label(text) {
     clearTimeout(flash);
-    top.textContent = text || (account ? "Account" : "Sign in");
+    top.textContent = t(text || (account ? "Account" : "Sign in"));
     if (text) flash = setTimeout(function () { label(); }, 2500);
   }
   function signedIn(d) {

@@ -12,6 +12,7 @@
   }
   var RC = window.RC;
   if (!RC) return;
+  var t = window.I18N ? window.I18N.t : function (s, v) { return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in v ? v[k] : m; }) : s; };
 
   function mq(q) { return window.matchMedia ? window.matchMedia(q) : { matches: false }; }
   var phone = mq("(max-width: 760px)"), coarse = mq("(pointer: coarse)");
@@ -32,12 +33,12 @@
   // ---- the tab bar
   var home = /(^|\/)(index\.html)?$/.test(location.pathname);
   var tabs = document.createElement("nav");
-  tabs.className = "rc-tabbar"; tabs.setAttribute("aria-label", "Store");
+  tabs.className = "rc-tabbar"; tabs.setAttribute("aria-label", t("Store"));
   tabs.innerHTML =
-    '<a href="index.html" data-tab="home"' + (home ? ' aria-current="page"' : "") + ">" + ICON.store + "<span>Store</span></a>" +
-    '<button type="button" data-tab="wish">' + ICON.wish + '<span>Wishlist</span><b class="rc-badge" data-rc-count="wish"></b></button>' +
-    '<button type="button" data-tab="cart">' + ICON.cart + '<span>Cart</span><b class="rc-badge" data-rc-count="cart"></b></button>' +
-    '<button type="button" data-tab="account" hidden>' + ICON.user + '<span data-label>Sign in</span></button>';
+    '<a href="index.html" data-tab="home"' + (home ? ' aria-current="page"' : "") + ">" + ICON.store + "<span>" + t("Store") + "</span></a>" +
+    '<button type="button" data-tab="wish">' + ICON.wish + "<span>" + t("Wishlist") + '</span><b class="rc-badge" data-rc-count="wish"></b></button>' +
+    '<button type="button" data-tab="cart">' + ICON.cart + "<span>" + t("Cart") + '</span><b class="rc-badge" data-rc-count="cart"></b></button>' +
+    '<button type="button" data-tab="account" hidden>' + ICON.user + "<span data-label>" + t("Sign in") + "</span></button>";
   document.body.appendChild(tabs);
   if (RC.paintCounts) RC.paintCounts();
 
@@ -159,7 +160,7 @@
     var miniBtn = mini.querySelector("button");
     var paintMini = function () {
       var now = document.querySelector(".buy [data-price] .now");
-      miniBtn.textContent = buy.textContent === "Get notified" ? "Notify me" : "Add · " + (now ? now.textContent : "");
+      miniBtn.textContent = buy.textContent === t("Get notified") ? t("Notify me") : t("Add · {price}", { price: now ? now.textContent : "" });
     };
     paintMini();
     miniBtn.addEventListener("click", function () { buy.click(); });
@@ -205,12 +206,12 @@
     if (hint || standalone || inWallet || get("rc-app-hint") || visits < 2 || !phone.matches) return;
     if (!prompt && !iosSafari) return;
     hint = document.createElement("div");
-    hint.className = "rc-install"; hint.setAttribute("role", "region"); hint.setAttribute("aria-label", "Get the app");
+    hint.className = "rc-install"; hint.setAttribute("role", "region"); hint.setAttribute("aria-label", t("Get the app"));
     hint.innerHTML = '<img src="icons/apple-touch-icon.png" alt="">' +
       (prompt
-        ? "<p><b>Get the app</b>The store on your home screen.</p><button class=\"rc-get\" type=\"button\">Install</button>"
-        : "<p><b>Get the app</b>Tap Share " + ICON.share + " then Add to Home Screen.</p>") +
-      '<button class="rc-nope" type="button" aria-label="Not now">×</button>';
+        ? "<p><b>" + t("Get the app") + "</b>" + t("The store on your home screen.") + '</p><button class="rc-get" type="button">' + t("Install") + "</button>"
+        : "<p><b>" + t("Get the app") + "</b>" + t("Tap Share {icon} then Add to Home Screen.", { icon: ICON.share }) + "</p>") +
+      '<button class="rc-nope" type="button" aria-label="' + t("Not now") + '">×</button>';
     hint.querySelector(".rc-nope").addEventListener("click", dismiss);
     var get_ = hint.querySelector(".rc-get");
     if (get_) get_.addEventListener("click", function () {

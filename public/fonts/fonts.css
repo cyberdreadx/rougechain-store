@@ -4,3 +4,10 @@
 @font-face { font-family: "Rajdhani"; src: url("Rajdhani-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
 @font-face { font-family: "Orbitron"; src: url("Orbitron.ttf") format("truetype"); font-weight: 400 900; font-style: normal; font-display: swap; }
 @font-face { font-family: "Share Tech Mono"; src: url("ShareTechMono.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+/* Cyrillic, for the Russian store. The game's typefaces have no Cyrillic letters, so these faces
+   join the same family names for Cyrillic only (unicode-range): Exo 2 beside Rajdhani, Russo One
+   beside Orbitron, PT Mono beside Share Tech Mono. Browsers fetch them only for a page that has
+   Cyrillic on it. Cut down to Cyrillic, from the SIL OFL fonts (OFL files beside them). */
+@font-face { font-family: "Rajdhani"; src: url("Exo2-Cyrillic.woff2") format("woff2"); font-weight: 500 700; font-style: normal; font-display: swap; unicode-range: U+0400-045F, U+0490-0491, U+2116; size-adjust: 94%; }
+@font-face { font-family: "Orbitron"; src: url("RussoOne-Cyrillic.woff2") format("woff2"); font-weight: 400 900; font-style: normal; font-display: swap; unicode-range: U+0400-045F, U+0490-0491, U+2116; }
+@font-face { font-family: "Share Tech Mono"; src: url("PTMono-Cyrillic.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0400-045F, U+0490-0491, U+2116; }

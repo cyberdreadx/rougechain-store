@@ -58,8 +58,10 @@ html.rc-locked, html.rc-locked body { overflow: hidden; }
   :root .rc-form input, :root .search input { font-size: 16px; }
 
   /* ---- the game page's compact title, once its own title has scrolled away */
+  /* it floats over the bar's right side, so it never makes the bar taller */
   .rc-mini {
-    display: flex; align-items: center; gap: 10px; margin-left: auto; min-width: 0;
+    position: absolute; top: 0; bottom: 0; left: calc(var(--gutter-l, 16px) + 44px); right: var(--gutter-r, 16px);
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0;
     opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .18s ease, transform .18s ease;
   }
   .rc-mini.on { opacity: 1; transform: none; pointer-events: auto; }
@@ -117,3 +119,19 @@ html.rc-locked, html.rc-locked body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .rc-tabbar svg, .rc-mini { transition: none; }
 }
+
+/* ---- the footer's language links (i18n.js) */
+[data-langs] a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+[data-langs] a[aria-current] { color: var(--text, #f0f4f6); font-weight: 600; text-decoration: none; }
+
+/* ---- Chinese, Japanese and Korean (i18n.js sets <html lang>). Their text uses the phone's own
+   fonts, picked for the language by lang. Wide Latin letter-spacing scatters CJK characters, and
+   one-line line-heights crowd them when a heading wraps; the logos keep their look. */
+:root:is(:lang(ja), :lang(zh), :lang(ko)) body { line-height: 1.7; }
+:root:is(:lang(ja), :lang(zh), :lang(ko)) :is(h1, h2, h3, h4, b, strong, dt, button, label, small, .btn, .pill-btn, .rc-go, .tags span, .chips span, .crumbs, .studio, .promo, .note, .meta, .name, .ea-badge, .f-flag, .tag, .cap, .facts-line):not(.brand, .brand *, h1.title, .word, .capsule .mark strong, .card .cap strong) {
+  letter-spacing: .02em; line-height: 1.35;
+}
+:root:lang(ko) body { word-break: keep-all; overflow-wrap: anywhere; }
+:root:lang(ja) body { line-break: strict; }
+/* Japanese and Chinese headings break between phrases (after 、 or a space), not inside a word */
+:root:is(:lang(ja), :lang(zh)) :is(h1, h2, h3) { word-break: keep-all; overflow-wrap: anywhere; }

@@ -77,6 +77,20 @@ test("an emailed code makes an account and signs in", async () => {
   assert.ok(![...b.store.map.keys()].some((k) => k.includes(b.cookie)));
 });
 
+test("the code email goes out in the language the visitor reads the store in", async () => {
+  const b = browser();
+  await b.call("POST", "/auth/email/code", { email: "alma@example.com", lang: "es" });
+  b.clock.t += 61_000;
+  await b.call("POST", "/auth/email/code", { email: "alma@example.com", lang: "ru" });
+  b.clock.t += 61_000;
+  await b.call("POST", "/auth/email/code", { email: "alma@example.com", lang: "klingon" });
+  for (const lang of ["ja", "zh", "ko"]) {
+    b.clock.t += 61_000;
+    await b.call("POST", "/auth/email/code", { email: "alma@example.com", lang });
+  }
+  assert.deepEqual(b.mails.map((m) => m.lang), ["es", "ru", "en", "ja", "zh", "ko"]);
+});
+
 test("a code works once, and the same email always reaches the same account", async () => {
   const b = browser();
   const first = await b.emailSignIn("trinity@example.com");

@@ -20,6 +20,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RC Store">
+<script src="i18n.js"></script>
 <style>
 /* Layout: a storefront page in the game's own skin. Store bar, then the title, a media viewer beside the
    capsule and facts, the buy box, then the long read (about, arsenal, arenas, specs) beside a sidebar of
@@ -135,8 +136,8 @@ h1.title { margin: 0; font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); lett
 
 /* ---------- body: long read + sidebar ---------- */
 .body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 26px; margin-top: 26px; }
-.main { min-width: 0; display: grid; gap: 30px; align-content: start; }
-.side { min-width: 0; display: grid; gap: 16px; align-content: start; }
+.main { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 30px; align-content: start; }
+.side { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-content: start; }
 h2.sec { margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); font: 700 17px/1.2 var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--text); }
 h2.sec small { font: 400 12px/1 var(--mono); color: var(--muted); letter-spacing: .06em; margin-left: 8px; text-transform: none; }
 
@@ -523,6 +524,7 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
     <span>Gltch Runner is in development. Screenshots are from the current build and everything here may change.</span>
     <span data-contact></span>
     <span data-legal></span>
+    <span data-langs></span>
   </div>
 </footer>
 
@@ -532,6 +534,7 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
 <script src="app.js"></script>
 <script>
 (function () {
+  var tr = window.I18N ? window.I18N.t : function (s, v) { return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in v ? v[k] : m; }) : s; };
   var SHOTS = [
     ["kestrel-night", "Story", "Kestrel Block at half past nine, in the rain"],
     ["neonrow-street", "Arena", "Neon Row: team deathmatch down a street canyon"],
@@ -562,7 +565,7 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
   SHOTS.forEach(function (s, i) {
     var b = document.createElement("button");
     b.className = "thumb"; b.type = "button"; b.setAttribute("role", "listitem");
-    b.setAttribute("aria-label", s[2]);
+    b.setAttribute("aria-label", tr(s[2]));
     b.innerHTML = '<img src="img/' + s[0] + '-t.jpg" alt="">';
     b.addEventListener("click", function () { show(i); });
     strip.appendChild(b);
@@ -572,9 +575,9 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
     var s = SHOTS[at];
     img.style.opacity = 0;
     var next = new Image();
-    next.onload = next.onerror = function () { img.src = next.src; img.alt = s[2]; img.style.opacity = 1; };
+    next.onload = next.onerror = function () { img.src = next.src; img.alt = tr(s[2]); img.style.opacity = 1; };
     next.src = "img/" + s[0] + ".jpg";
-    cap.textContent = s[2]; tag.textContent = s[1];
+    cap.textContent = tr(s[2]); tag.textContent = tr(s[1]);
     Array.prototype.forEach.call(strip.children, function (t, k) { t.setAttribute("aria-current", k === at ? "true" : "false"); });
     var t = strip.children[at];
     if (t) { strip.scrollTo({ left: t.offsetLeft - strip.clientWidth / 2 + t.clientWidth / 2, behavior: "smooth" }); }
@@ -594,12 +597,12 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
   GUNS.forEach(function (g, i) {
     var d = document.createElement("div");
     d.className = "gun";
-    d.innerHTML = '<img src="img/w' + String(i).padStart(2, "0") + '.png" alt="' + g[0] + '" loading="lazy"><b>' + g[0] + '</b><span>' + g[1] + '</span>';
+    d.innerHTML = '<img src="img/w' + String(i).padStart(2, "0") + '.png" alt="' + g[0] + '" loading="lazy"><b>' + g[0] + '</b><span>' + tr(g[1]) + '</span>';
     guns.appendChild(d);
   });
   var blade = document.createElement("div");
   blade.className = "gun blade";
-  blade.innerHTML = '<img src="img/katana.png" alt="MonoEdge katana" loading="lazy"><b>MONOEDGE</b><span>Katana</span>';
+  blade.innerHTML = '<img src="img/katana.png" alt="' + tr("MonoEdge katana") + '" loading="lazy"><b>MONOEDGE</b><span>' + tr("Katana") + '</span>';
   guns.appendChild(blade);
 
 })();
