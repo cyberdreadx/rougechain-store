@@ -4,3 +4,4 @@ __pycache__/
 Thumbs.db
 desktop.ini
 .netlify/
+node_modules/

@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "RougeChain Store",
+  "short_name": "RC Store",
+  "description": "RougeChain Technologies' store: Gltch Runner in Early Access, with merch, apps and more on the way.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#07080d",
+  "theme_color": "#07080d",
+  "categories": ["games", "shopping"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Gltch Runner", "short_name": "Gltch Runner", "url": "/gltch-runner.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Your cart", "short_name": "Cart", "url": "/#cart", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Your wishlist", "short_name": "Wishlist", "url": "/#wishlist", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ],
+  "screenshots": [
+    { "src": "icons/screen-phone.jpg", "sizes": "780x1688", "type": "image/jpeg", "form_factor": "narrow", "label": "The RougeChain Store on a phone" },
+    { "src": "icons/screen-wide.jpg", "sizes": "1280x800", "type": "image/jpeg", "form_factor": "wide", "label": "The RougeChain Store" }
+  ]
+}

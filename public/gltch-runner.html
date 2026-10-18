@@ -2,10 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Gltch Runner · RougeChain Store</title>
 <meta name="description" content="Gltch Runner: a cyberpunk FPS from RougeChain Technologies, in Early Access. Kestrel Block, eleven missing days, 16 guns and a katana, 8 arenas.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gltch Runner · RougeChain Store">
+<meta property="og:description" content="Gltch Runner: a cyberpunk FPS from RougeChain Technologies, in Early Access. Kestrel Block, eleven missing days, 16 guns and a katana, 8 arenas.">
+<meta property="og:image" content="https://store.rougechain.io/img/capsule.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="app.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#07080d">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RC Store">
 <style>
 /* Layout: a storefront page in the game's own skin. Store bar, then the title, a media viewer beside the
    capsule and facts, the buy box, then the long read (about, arsenal, arenas, specs) beside a sidebar of
@@ -239,6 +253,17 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
   .nav { display: none; }
   .actions .note { margin-left: 0; width: 100%; }
   .buy .platform { position: static; }
+}
+/* phones: the updates swipe sideways, and the screenshot strip snaps */
+@media (max-width: 760px) {
+  .updates { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    margin-left: calc(-1 * var(--gutter-l)); margin-right: calc(-1 * var(--gutter-r)); padding-left: var(--gutter-l); padding-right: var(--gutter-r); scroll-padding-left: var(--gutter-l); }
+  .updates::-webkit-scrollbar { display: none; }
+  .update { flex: 0 0 84%; scroll-snap-align: start; }
+  .strip { scroll-snap-type: x proximity; scrollbar-width: none; }
+  .strip::-webkit-scrollbar { display: none; }
+  .thumb { scroll-snap-align: center; width: 104px; }
+  .hero { padding: 10px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -503,6 +528,8 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
 
 <script src="store-config.js"></script>
 <script src="store.js"></script>
+<script src="account.js"></script>
+<script src="app.js"></script>
 <script>
 (function () {
   var SHOTS = [
@@ -575,11 +602,6 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
   blade.innerHTML = '<img src="img/katana.png" alt="MonoEdge katana" loading="lazy"><b>MONOEDGE</b><span>Katana</span>';
   guns.appendChild(blade);
 
-  // ---- the store bar's wishlist button: to this game's wishlist button
-  document.getElementById("wishlist-top").addEventListener("click", function () {
-    var wish = document.getElementById("wish");
-    wish.scrollIntoView({ behavior: "smooth", block: "center" }); wish.focus({ preventScroll: true });
-  });
 })();
 </script>
 </body>

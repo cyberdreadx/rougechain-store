@@ -1,3 +1,19 @@
-# The site is plain files in public/: nothing to build.
+# The site is plain files in public/: nothing to build. Netlify installs package.json's
+# dependencies and bundles the accounts API in netlify/functions (served at /api/*).
 [build]
   publish = "public"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# The app's service worker must always be fetched fresh, so updates reach installed copies.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"

@@ -3,7 +3,10 @@
 //   a product with a Stripe Payment Link  ->  "Add to cart"; the cart's "Continue to payment" goes to Stripe
 //   none, but an email signup is set      ->  "Get notified" opens the signup form
 //   neither (a preview)                   ->  "Add to cart"; the cart says checkout isn't open yet
-// Wishlist, follows and the cart are kept in this browser only (localStorage).
+// The wishlist and the cart each open as a panel (a bottom sheet on phones, see app.css).
+// Wishlist, follows and the cart are kept in this browser (localStorage). account.js adds sign-in:
+// while someone is signed in, their wishlist and follows are saved to their account too, and checkout
+// tells Stripe which account is buying.
 (function () {
   var S = window.STORE || {};
 
@@ -58,6 +61,12 @@
     ".rc-form label{font:600 13px/1 var(--ui,var(--display,'Rajdhani',sans-serif));letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#9095a8)}",
     ".rc-form input{background:var(--ink,#07080d);border:1px solid var(--line,#252839);color:var(--text,#f0f4f6);padding:10px 11px;font:inherit;border-radius:2px}",
     ".rc-fine{margin:0;font-size:12.5px;color:var(--muted,#9095a8)}",
+    ".rc-panel.rc-wishp{grid-template-rows:auto 1fr}",
+    ".rc-wishp .rc-line{grid-template-columns:96px minmax(0,1fr) auto}",
+    ".rc-wishp .rc-line a{color:inherit;text-decoration:none}",
+    ".rc-acts{grid-column:2/4;display:flex;align-items:center;gap:16px}",
+    ".rc-wish-add{border:0;border-radius:999px;padding:7px 12px;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--crimson,#d5243e),#692f96);font:700 13px/1 var(--ui,var(--display,'Rajdhani',sans-serif));letter-spacing:.06em;text-transform:uppercase}",
+    ".rc-wishp .rc-rm{grid-column:auto}",
     ".rc-fine a{color:inherit;text-decoration:underline}"
   ].join("");
   document.head.appendChild(css);
@@ -71,6 +80,10 @@
       '<div class="rc-total"><div class="rc-row"><span>Estimated total</span><span class="rc-sum">—</span></div>' +
       '<p class="rc-note"></p><button class="rc-go rc-pay" type="button">Continue to payment</button></div>' +
     '</section>' +
+    '<section class="rc-panel rc-wishp" role="dialog" aria-modal="true" aria-labelledby="rc-wish-h" hidden>' +
+      '<header><h2 id="rc-wish-h">Wishlist</h2><button class="rc-x" type="button" aria-label="Close the wishlist">×</button></header>' +
+      '<div class="rc-lines"></div>' +
+    '</section>' +
     '<section class="rc-panel rc-notify" role="dialog" aria-modal="true" aria-labelledby="rc-notify-h" hidden>' +
       '<header><h2 id="rc-notify-h">Get notified</h2><button class="rc-x" type="button" aria-label="Close">×</button></header>' +
       '<p class="rc-what"></p>' +
@@ -83,20 +96,59 @@
   var scrim = shell.querySelector(".rc-scrim");
   var cart = shell.querySelector(".rc-cart");
   var notify = shell.querySelector(".rc-notify");
+  var wishp = shell.querySelector(".rc-wishp");
   if (S.privacyUrl) notify.querySelector(".rc-fine").insertAdjacentHTML("beforeend", ' <a href="' + esc(S.privacyUrl) + '">Privacy policy</a>');
 
-  var opened = null, opener = null;
-  function open(panel, from) { if (opened) close(); opened = panel; opener = from || null; panel.hidden = false; scrim.hidden = false; panel.querySelector(".rc-x").focus(); }
-  function close() { if (!opened) return; opened.hidden = true; scrim.hidden = true; opened = null; if (opener && opener.focus) opener.focus(); }
+  // On a phone the panels are bottom sheets (app.css): they slide away when closed, and the page
+  // behind them doesn't scroll. close(true) closes at once (app.js has already slid it away).
+  function mq(q) { return window.matchMedia ? window.matchMedia(q) : { matches: false }; }
+  var phone = mq("(max-width: 760px)"), still = mq("(prefers-reduced-motion: reduce)");
+  var opened = null, opener = null, closing = null;
+  function lock(on) { document.documentElement.classList.toggle("rc-locked", !!on && phone.matches); }
+  function settle() {
+    if (!closing) return;
+    clearTimeout(closing.timer);
+    closing.panel.hidden = true; closing.panel.classList.remove("rc-closing"); scrim.classList.remove("rc-closing");
+    if (!opened) { scrim.hidden = true; lock(false); }
+    closing = null;
+  }
+  function open(panel, from) {
+    if (opened) close(true);
+    settle();
+    opened = panel; opener = from || null; panel.hidden = false; scrim.hidden = false; lock(true);
+    panel.querySelector(".rc-x").focus({ preventScroll: true });
+  }
+  function close(now) {
+    if (!opened) return;
+    var panel = opened;
+    opened = null;
+    if (opener && opener.focus) opener.focus({ preventScroll: true });
+    if (now === true || !phone.matches || still.matches) { panel.hidden = true; scrim.hidden = true; lock(false); return; }
+    panel.classList.add("rc-closing"); scrim.classList.add("rc-closing");
+    closing = { panel: panel, timer: setTimeout(settle, 220) };
+  }
+  function mount(panel) {
+    shell.appendChild(panel);
+    panel.querySelectorAll(".rc-x").forEach(function (x) { x.addEventListener("click", close); });
+  }
   scrim.addEventListener("click", close);
   shell.querySelectorAll(".rc-x").forEach(function (x) { x.addEventListener("click", close); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && opened) close(); });
+
+  // ---- the wishlist and follow buttons repaint through these when the lists change
+  var painters = [];
+  function paintLists() { painters.forEach(function (p) { p(); }); paintCounts(); if (!wishp.hidden) paintWish(); }
+  function listsChanged() { document.dispatchEvent(new CustomEvent("rc:lists")); }
 
   // ---- counts in the store bar
   function paintCounts() {
     var w = document.getElementById("wish-count"), c = document.getElementById("cart-count");
     if (w) w.textContent = String(read("rc-wish").length);
     if (c) c.textContent = String(read("rc-cart").length);
+    document.querySelectorAll("[data-rc-count]").forEach(function (b) {
+      var n = read(b.getAttribute("data-rc-count") === "cart" ? "rc-cart" : "rc-wish").length;
+      b.textContent = n ? String(n) : ""; b.setAttribute("data-n", String(n));
+    });
   }
 
   // ---- the cart
@@ -118,13 +170,46 @@
     if (!items.length) { pay.disabled = true; note.textContent = ""; }
     else if (!live) { pay.disabled = true; note.textContent = "Checkout isn't open yet. Until it is, keep things on your wishlist."; }
     else if (items.length > 1) { pay.disabled = true; note.textContent = "For now, buy one item at a time."; }
-    else { pay.disabled = false; note.textContent = "You pay on Stripe's secure checkout page."; }
+    else { pay.disabled = false; note.textContent = "You pay on Stripe's secure checkout page." + (window.RC && window.RC.account ? " The purchase is saved to your store account." : ""); }
   }
   function openCart(from) { paintCart(); open(cart, from); }
+  // Signed in: Stripe gets the account id (it shows as the payment's client reference ID) and the email.
+  function payUrl(id) {
+    var url = link(id), who = window.RC && window.RC.account;
+    if (!url || !who) return url;
+    try {
+      var u = new URL(url);
+      u.searchParams.set("client_reference_id", who.id);
+      if (who.email) u.searchParams.set("prefilled_email", who.email);
+      return u.toString();
+    } catch (e) { return url; }
+  }
   cart.querySelector(".rc-pay").addEventListener("click", function () {
     var items = read("rc-cart");
-    if (items.length === 1 && link(items[0])) window.location.href = link(items[0]);
+    if (items.length === 1 && link(items[0])) window.location.href = payUrl(items[0]);
   });
+
+  // ---- the wishlist
+  function paintWish() {
+    var items = read("rc-wish"), lines = wishp.querySelector(".rc-lines");
+    lines.innerHTML = items.length ? "" : '<p class="rc-empty">Nothing saved yet. Tap ♡ Add to wishlist on a game to keep it here.</p>';
+    items.forEach(function (id) {
+      var p = PRODUCTS[id];
+      var row = document.createElement("div");
+      row.className = "rc-line";
+      row.innerHTML = '<a href="' + p.page + '"><img src="' + p.pic + '" alt=""></a><a href="' + p.page + '"><b>' + esc(p.name) + '</b><span>' + esc(p.kind) + '</span></a>' +
+        '<span class="rc-amt">' + (p.was > p.now ? '<s>' + money(p.was) + '</s>' : '') + money(p.now) + '</span>' +
+        '<div class="rc-acts"><button class="rc-wish-add" type="button">' + (mode(id) === "notify" ? "Get notified" : "Add to cart") + '</button>' +
+        '<button class="rc-rm" type="button">Remove</button></div>';
+      row.querySelector(".rc-wish-add").addEventListener("click", function () {
+        if (mode(id) === "notify") { openNotify(id); return; }
+        put("rc-cart", id, true); paintCounts(); openCart();
+      });
+      row.querySelector(".rc-rm").addEventListener("click", function () { put("rc-wish", id, false); paintLists(); paintWish(); listsChanged(); });
+      lines.appendChild(row);
+    });
+  }
+  function openWish(from) { paintWish(); open(wishp, from); }
 
   // ---- signup, while a product isn't on sale
   function openNotify(id, from) {
@@ -160,17 +245,19 @@
   document.querySelectorAll("[data-wish]").forEach(function (b) {
     var id = b.getAttribute("data-wish");
     function paint() { var on = has("rc-wish", id); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "♥ On your wishlist" : "♡ Add to wishlist"; }
-    b.addEventListener("click", function () { put("rc-wish", id, !has("rc-wish", id)); paint(); paintCounts(); });
-    paint();
+    b.addEventListener("click", function () { put("rc-wish", id, !has("rc-wish", id)); paint(); paintCounts(); listsChanged(); });
+    painters.push(paint); paint();
   });
   document.querySelectorAll("[data-follow]").forEach(function (b) {
     var id = b.getAttribute("data-follow");
     function paint() { var on = has("rc-follow", id); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "Following" : "Follow"; }
-    b.addEventListener("click", function () { put("rc-follow", id, !has("rc-follow", id)); paint(); });
-    paint();
+    b.addEventListener("click", function () { put("rc-follow", id, !has("rc-follow", id)); paint(); listsChanged(); });
+    painters.push(paint); paint();
   });
   var cartTop = document.getElementById("cart-top");
   if (cartTop) cartTop.addEventListener("click", function (e) { openCart(e.currentTarget); });
+  var wishTop = document.getElementById("wishlist-top");
+  if (wishTop) wishTop.addEventListener("click", function (e) { e.preventDefault(); openWish(e.currentTarget); });
 
   // ---- footer: contact and policies, where they are set
   document.querySelectorAll("[data-contact]").forEach(function (el) {
@@ -185,5 +272,13 @@
   });
 
   paintCounts();
-  window.RC = { products: PRODUCTS, mode: mode, openCart: openCart, clearCart: function () { write("rc-cart", []); paintCounts(); } };
+  window.RC = {
+    products: PRODUCTS, mode: mode, openCart: openCart, openWishlist: openWish, paintCounts: paintCounts,
+    clearCart: function () { write("rc-cart", []); paintCounts(); },
+    // for account.js
+    account: null,
+    panel: { mount: mount, open: open, close: close },
+    lists: function () { return { wishlist: read("rc-wish"), follows: read("rc-follow") }; },
+    setLists: function (l) { write("rc-wish", l.wishlist || []); write("rc-follow", l.follows || []); paintLists(); }
+  };
 })();
