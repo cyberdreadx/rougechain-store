@@ -127,6 +127,18 @@ test("the six languages, one file each, all with the same keys and {slots}", () 
   assert.deepEqual(bad, []);
 });
 
+test("translated pieces written side by side get a space, but none after Chinese or Japanese punctuation", () => {
+  const join = (a, b) => a + I18N.gap(a, b) + b;
+  assert.equal(join("Qwalla didn't open.", "Get Qwalla"), "Qwalla didn't open. Get Qwalla");
+  assert.equal(join("Qwalla가 열리지 않았어요.", "Qwalla 설치"), "Qwalla가 열리지 않았어요. Qwalla 설치");
+  assert.equal(join("Qwallaが開きませんでした。", "Qwallaを入手"), "Qwallaが開きませんでした。Qwallaを入手");
+  assert.equal(join("Qwallaを入手", "（iPhone・Android対応）"), "Qwallaを入手（iPhone・Android対応）");
+  assert.equal(join("下载 Qwalla", "iPhone 或 Android 版"), "下载 Qwalla iPhone 或 Android 版");
+  assert.equal(join("联系方式：", "@"), "联系方式：@");
+  assert.equal(join("付款。", "购买记录"), "付款。购买记录");
+  assert.equal(join("购物车", "商店"), "购物车商店");
+});
+
 test("the pages' text is all translated", () => {
   const pages = readdirSync(PUB).filter((f) => f.endsWith(".html"));
   assert.ok(pages.length >= 4);

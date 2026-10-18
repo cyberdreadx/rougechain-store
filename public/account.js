@@ -21,6 +21,7 @@
   // i18n.js translates; without it, the English with its {slots} filled
   var t = window.I18N ? window.I18N.t : function (s, v) { return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in v ? v[k] : m; }) : s; };
   var LANG = window.I18N ? window.I18N.lang : "en";
+  var gap = window.I18N ? window.I18N.gap : function () { return " "; };
 
   // ---- styles (the page's colours where it has them, like store.js)
   var UI = "var(--ui,var(--display,'Rajdhani',sans-serif))";
@@ -450,7 +451,8 @@
     location.href = qwallaLink();
     setTimeout(function () {
       if (!left && document.visibilityState === "visible") {
-        noteHtml(msg, t("Qwalla didn't open.") + ' <a href="' + QWALLA_URL + '" target="_blank" rel="noopener">' + t("Get Qwalla") + "</a> " + t("for iPhone or Android, then try again."));
+        var a = t("Qwalla didn't open."), b = t("Get Qwalla"), c = t("for iPhone or Android, then try again.");
+        noteHtml(msg, a + gap(a, b) + '<a href="' + QWALLA_URL + '" target="_blank" rel="noopener">' + b + "</a>" + gap(b, c) + c);
       }
     }, 1800);
   }

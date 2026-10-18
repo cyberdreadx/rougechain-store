@@ -133,3 +133,5 @@ html.rc-locked, html.rc-locked body { overflow: hidden; }
 }
 :root:lang(ko) body { word-break: keep-all; overflow-wrap: anywhere; }
 :root:lang(ja) body { line-break: strict; }
+/* Japanese and Chinese headings break between phrases (after 、 or a space), not inside a word */
+:root:is(:lang(ja), :lang(zh)) :is(h1, h2, h3) { word-break: keep-all; overflow-wrap: anywhere; }

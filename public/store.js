@@ -11,6 +11,7 @@
   var S = window.STORE || {};
   // i18n.js translates; without it, the English with its {slots} filled
   var t = window.I18N ? window.I18N.t : function (s, v) { return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in v ? v[k] : m; }) : s; };
+  var gap = window.I18N ? window.I18N.gap : function () { return " "; };
 
   // ---- what the store sells (prices in cents)
   var PRODUCTS = {
@@ -172,7 +173,7 @@
     if (!items.length) { pay.disabled = true; note.textContent = ""; }
     else if (!live) { pay.disabled = true; note.textContent = t("Checkout isn't open yet. Until it is, keep things on your wishlist."); }
     else if (items.length > 1) { pay.disabled = true; note.textContent = t("For now, buy one item at a time."); }
-    else { pay.disabled = false; note.textContent = t("You pay on Stripe's secure checkout page.") + (window.RC && window.RC.account ? " " + t("The purchase is saved to your store account.") : ""); }
+    else { pay.disabled = false; var pays = t("You pay on Stripe's secure checkout page."), saved = t("The purchase is saved to your store account."); note.textContent = pays + (window.RC && window.RC.account ? gap(pays, saved) + saved : ""); }
   }
   function openCart(from) { paintCart(); open(cart, from); }
   // Signed in: Stripe gets the account id (it shows as the payment's client reference ID) and the email.
@@ -263,7 +264,7 @@
 
   // ---- footer: contact and policies, where they are set
   document.querySelectorAll("[data-contact]").forEach(function (el) {
-    if (S.contactEmail) el.innerHTML = t("Contact:") + ' <a href="mailto:' + esc(S.contactEmail) + '">' + esc(S.contactEmail) + '</a>';
+    if (S.contactEmail) el.innerHTML = t("Contact:") + gap(t("Contact:"), "@") + '<a href="mailto:' + esc(S.contactEmail) + '">' + esc(S.contactEmail) + '</a>';
   });
   document.querySelectorAll("[data-legal]").forEach(function (el) {
     var parts = [];

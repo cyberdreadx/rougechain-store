@@ -9,7 +9,8 @@
 //   - Once the page is parsed, every text, alt, aria-label, placeholder and title whose English is
 //     in the file is swapped for the translation, and so are the <title> and description. Anything
 //     not in the file stays English. The page stays hidden for that moment, so nobody sees it change.
-//   - Scripts translate what they write with I18N.t("English text", { name: value }).
+//   - Scripts translate what they write with I18N.t("English text", { name: value }), and join
+//     two translated pieces with I18N.gap(a, b): a space, or none in Chinese and Japanese.
 //   - [data-langs] (the footers) gets the links to every language.
 //
 // Adding English text anywhere? Add its line to every file in public/i18n; `npm test` lists any
@@ -60,6 +61,17 @@
   function fill(s, vars) {
     return vars ? s.replace(/\{(\w+)\}/g, function (m, k) { return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : m; }) : s;
   }
+  // Chinese and Japanese put no space after their own punctuation, before their brackets, or
+  // between two of their own characters.
+  var CJK = "\u3040-\u30ff\u3400-\u9fff", MARK = "\u3000-\u303f\uff00-\uffef";
+  var END_MARK = new RegExp("[" + MARK + "]$"), START_MARK = new RegExp("^[" + MARK + "]");
+  var END_CJK = new RegExp("[" + CJK + "]$"), START_CJK = new RegExp("^[" + CJK + "]");
+  /** The space between two translated pieces written side by side: " ", or none for Chinese and Japanese. */
+  function gap(a, b) {
+    a = String(a).trim(); b = String(b).trim();
+    return END_MARK.test(a) || START_MARK.test(b) || (END_CJK.test(a) && START_CJK.test(b)) ? "" : " ";
+  }
+
   /** The translation of an English string (with {name} slots filled from vars), or the English. */
   function t(s, vars) {
     var hit = words()[norm(s)];
@@ -118,7 +130,7 @@
   else ready();
 
   window.I18N = {
-    lang: lang, langs: LANGS, t: t, apply: apply,
+    lang: lang, langs: LANGS, t: t, gap: gap, apply: apply,
     get dict() { return words(); }
   };
 })();
