@@ -123,3 +123,13 @@ html.rc-locked, html.rc-locked body { overflow: hidden; }
 /* ---- the footer's language links (i18n.js) */
 [data-langs] a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 [data-langs] a[aria-current] { color: var(--text, #f0f4f6); font-weight: 600; text-decoration: none; }
+
+/* ---- Chinese, Japanese and Korean (i18n.js sets <html lang>). Their text uses the phone's own
+   fonts, picked for the language by lang. Wide Latin letter-spacing scatters CJK characters, and
+   one-line line-heights crowd them when a heading wraps; the logos keep their look. */
+:root:is(:lang(ja), :lang(zh), :lang(ko)) body { line-height: 1.7; }
+:root:is(:lang(ja), :lang(zh), :lang(ko)) :is(h1, h2, h3, h4, b, strong, dt, button, label, small, .btn, .pill-btn, .rc-go, .tags span, .chips span, .crumbs, .studio, .promo, .note, .meta, .name, .ea-badge, .f-flag, .tag, .cap, .facts-line):not(.brand, .brand *, h1.title, .word, .capsule .mark strong, .card .cap strong) {
+  letter-spacing: .02em; line-height: 1.35;
+}
+:root:lang(ko) body { word-break: keep-all; overflow-wrap: anywhere; }
+:root:lang(ja) body { line-break: strict; }

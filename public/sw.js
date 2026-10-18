@@ -6,7 +6,7 @@
 //   /api/*, other sites      never touched (sign-in and Stripe always go to the network)
 //
 // Raise VERSION when SHELL changes; old copies are deleted when the new worker takes over.
-const VERSION = "rc-store-5";
+const VERSION = "rc-store-6";
 const SHELL = [
   "./", "index.html", "gltch-runner.html", "offline.html",
   "i18n.js", "store-config.js", "store.js", "account.js", "app.js", "app.css", "manifest.webmanifest",

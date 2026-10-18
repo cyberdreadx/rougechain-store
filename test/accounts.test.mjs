@@ -84,7 +84,11 @@ test("the code email goes out in the language the visitor reads the store in", a
   await b.call("POST", "/auth/email/code", { email: "alma@example.com", lang: "ru" });
   b.clock.t += 61_000;
   await b.call("POST", "/auth/email/code", { email: "alma@example.com", lang: "klingon" });
-  assert.deepEqual(b.mails.map((m) => m.lang), ["es", "ru", "en"]);
+  for (const lang of ["ja", "zh", "ko"]) {
+    b.clock.t += 61_000;
+    await b.call("POST", "/auth/email/code", { email: "alma@example.com", lang });
+  }
+  assert.deepEqual(b.mails.map((m) => m.lang), ["es", "ru", "en", "ja", "zh", "ko"]);
 });
 
 test("a code works once, and the same email always reaches the same account", async () => {

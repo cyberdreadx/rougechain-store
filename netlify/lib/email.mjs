@@ -1,4 +1,4 @@
-// Sends the sign-in code email through Resend (https://resend.com), in English, Spanish or Russian.
+// Sends the sign-in code email through Resend (https://resend.com), in the store's six languages.
 
 import { HttpError } from "./http.mjs";
 
@@ -24,7 +24,29 @@ const WORDS = {
     once: "Код действует один раз в течение 10 минут.",
     ignore: "Если вы его не запрашивали, просто проигнорируйте это письмо. Без кода войти никто не сможет.",
   },
+  ja: {
+    subject: (c) => `RougeChain Store のログインコード：${c}`,
+    line: (c) => `RougeChain Store のログインコードは ${c} です`,
+    heading: "ログインコード：",
+    once: "このコードは1回限り、10分間有効です。",
+    ignore: "お心当たりがない場合は、このメールを無視してください。コードがなければ誰もログインできません。",
+  },
+  zh: {
+    subject: (c) => `你的 RougeChain Store 验证码：${c}`,
+    line: (c) => `你的 RougeChain Store 登录验证码是 ${c}`,
+    heading: "你的登录验证码：",
+    once: "此验证码仅可使用一次，10 分钟内有效。",
+    ignore: "如果你没有申请验证码，请忽略此邮件。没有验证码，任何人都无法登录。",
+  },
+  ko: {
+    subject: (c) => `RougeChain Store 로그인 코드: ${c}`,
+    line: (c) => `RougeChain Store 로그인 코드: ${c}`, // no particle after the number: it depends on how the last digit sounds
+    heading: "로그인 코드:",
+    once: "이 코드는 10분 동안 한 번만 사용할 수 있어요.",
+    ignore: "요청하지 않으셨다면 이 메일은 무시하셔도 돼요. 코드가 없으면 아무도 로그인할 수 없어요.",
+  },
 };
+const HTML_LANG = { zh: "zh-CN" };
 
 export const EMAIL_LANGS = Object.keys(WORDS);
 
@@ -32,7 +54,7 @@ export function codeEmail(code, lang = "en") {
   const w = WORDS[lang] || WORDS.en;
   const subject = w.subject(code);
   const text = [w.line(code), "", w.once, w.ignore, "", "RougeChain Technologies · store.rougechain.io"].join("\n");
-  const html = `<!doctype html><html lang="${WORDS[lang] ? lang : "en"}"><body style="margin:0;padding:24px;background:#07080d;font-family:Segoe UI,Arial,sans-serif;color:#f0f4f6">
+  const html = `<!doctype html><html lang="${WORDS[lang] ? HTML_LANG[lang] || lang : "en"}"><body style="margin:0;padding:24px;background:#07080d;font-family:Segoe UI,Arial,sans-serif;color:#f0f4f6">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:440px;background:#10121b;border:1px solid #252839;border-top:3px solid #d5243e">
 <tr><td style="padding:24px 24px 8px;font:700 14px/1 Arial,sans-serif;letter-spacing:3px;text-transform:uppercase"><span style="color:#d5243e">ROUGECHAIN</span> STORE</td></tr>

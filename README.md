@@ -12,7 +12,8 @@ public/
   store-config.js     THE FILE YOU EDIT: Stripe links, email signup, contact, policy links
   store.js            prices, cart, checkout, wishlist (prices live in PRODUCTS at the top)
   account.js          the Sign in button and account panel (email, password, RougeChain wallet)
-  i18n.js             Spanish and Russian: picks the language and holds every translation
+  i18n.js             picks the language and swaps in its words (see Languages)
+  i18n/               the words: es, ru, ja, zh, ko, one file each
   app.js, app.css     the store as an app: tab bar, sheets, swipes, install hint (phones)
   sw.js               the service worker: installable, opens offline
   manifest.webmanifest  the app's name, icons, colours and shortcuts
@@ -24,7 +25,7 @@ netlify/
   functions/api.mjs   the accounts API, served at /api/*
   lib/accounts.mjs    its routes: email codes, passwords, Sign-In with RougeChain, linking, lists
   lib/…               sessions and hashing, the Resend email, the Netlify Blobs store
-test/                 the API's tests (npm test)
+test/                 the API's and the translations' tests (npm test)
 preview.py            makes a claude.ai preview page from public/index.html
 netlify.toml          tells Netlify to publish public/ and where the function is
 package.json          the function's two dependencies: @rougechain/sdk and @netlify/blobs
@@ -206,27 +207,39 @@ and raise `VERSION`. `netlify.toml` serves `sw.js` uncached so updates reach ins
 
 ## Languages
 
-The store speaks **English, Spanish and Russian**. It picks the visitor's phone or browser language
-on its own; the footer has **English · Español · Русский** links, and `?lang=es` / `?lang=ru` /
-`?lang=en` on any address switches too. The choice is remembered.
+The store speaks **English, Spanish, Russian, Japanese, Chinese (Simplified) and Korean**. It picks
+the visitor's phone or browser language on its own; the footer has
+**English · Español · Русский · 日本語 · 中文 · 한국어** links, and `?lang=en|es|ru|ja|zh|ko` on any
+address switches too. The choice is remembered.
 
 - The pages are written in English. `public/i18n.js` swaps each text, button, label and alt text
   for its translation before the page shows, so nobody sees it change. The cart, wishlist, sign-in,
   the app's tab bar and install card, the accounts server's messages and the sign-in code email
   are translated too. Dates follow the language.
+- The words live in `public/i18n/<lang>.js`, one file per language. A visitor downloads only
+  their own language's file.
 - Names stay as they are: Gltch Runner, Kestrel Block, NEXUS, Dead Signal, the weapons and arenas,
   XRGE. Prices stay in US dollars.
 - **Russian letters:** the game's typefaces have no Cyrillic, so `fonts/fonts.css` adds Exo 2 beside
   Rajdhani, Russo One beside Orbitron and PT Mono beside Share Tech Mono, for Cyrillic letters
   only (31 KB in all, downloaded only by pages with Russian on them).
+- **Japanese, Chinese and Korean** use the phone's or computer's own fonts (they hold thousands of
+  characters, too many to download). `<html lang>` is set to `ja`, `zh-CN` or `ko`, so the device
+  draws each language's own form of the characters. `app.css` gives these languages taller lines,
+  and stops Korean words from breaking in the middle. Chinese is Simplified; readers of
+  Traditional Chinese get Simplified for now.
 
-**Changing or adding text.** Add the English and its two translations to `T` in `public/i18n.js`:
+**Changing or adding text.** Add the English and its translation to every file in `public/i18n`:
 
 ```js
-"Add to cart": ["Añadir al carrito", "В корзину"],
+// public/i18n/es.js
+"Add to cart": "Añadir al carrito",
+// public/i18n/ja.js
+"Add to cart": "カートに追加",
 ```
 
 `npm test` reads every page, script and server message and fails with a list of any English that
-has no translation, so new text can't slip through untranslated. Text with a value in it uses a
-`{slot}`, the same in all three: `"{name} isn't on sale yet…"`. Spanish uses "tú"; Russian uses
-"вы".
+has no translation, and checks that every language file has the same lines, so new text can't slip
+through untranslated. Text with a value in it uses a `{slot}`, the same in every language:
+`"{name} isn't on sale yet…"`. Spanish uses "tú", Russian "вы", Japanese polite です/ます,
+Korean polite 해요, and Chinese 你.

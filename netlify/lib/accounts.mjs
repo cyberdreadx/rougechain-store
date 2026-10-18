@@ -6,7 +6,7 @@
 // same account once both are linked. The account also keeps the wishlist and follows.
 //
 //   GET  /api/account                 who is signed in: { account | null, methods, chainId }
-//   POST /api/auth/email/code         { email, lang? }                   emails a 6-digit code (lang: en, es, ru)
+//   POST /api/auth/email/code         { email, lang? }                   emails a 6-digit code (lang: en es ru ja zh ko)
 //   POST /api/auth/email/verify       { email, code, password?, intent? } signs in (or links), sets a password
 //   POST /api/auth/email/password     { email, password }                signs in with a password
 //   POST /api/auth/wallet/challenge   { publicKey, intent? }             the sign-in message to sign

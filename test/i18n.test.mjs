@@ -1,12 +1,12 @@
-// Every English text the store shows has a Spanish and a Russian line in public/i18n.js:
-// the pages' text and attributes, what the scripts write, and what the accounts server says.
-// When this fails it lists the missing English; add each one to T in public/i18n.js.
+// Every English text the store shows has a line in every language file in public/i18n: the
+// pages' text and attributes, what the scripts write, and what the accounts server says.
+// When this fails it lists the missing English; add each one to every file in public/i18n.
 
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { test } from "node:test";
 import vm from "node:vm";
-import { codeEmail } from "../netlify/lib/email.mjs";
+import { EMAIL_LANGS, codeEmail } from "../netlify/lib/email.mjs";
 
 const PUB = new URL("../public/", import.meta.url);
 const read = (f) => readFileSync(new URL(f, PUB), "utf8");
@@ -21,7 +21,7 @@ const KEEP = new Set([
   "notify", "Get notified", // "notify" is a mode name in a condition
 ]);
 
-function dictionary() {
+function core() {
   const sandbox = {
     window: {},
     location: { search: "", pathname: "/", hash: "" },
@@ -32,13 +32,22 @@ function dictionary() {
     document: {
       readyState: "complete", title: "", head: { appendChild() {} },
       documentElement: { classList: { add() {}, remove() {} } },
-      querySelectorAll: () => [], querySelector: () => null, addEventListener() {},
+      querySelectorAll: () => [], querySelector: () => null, addEventListener() {}, write() {},
     },
   };
   vm.runInNewContext(read("i18n.js"), sandbox);
-  return sandbox.window.I18N.dict;
+  return sandbox.window.I18N;
 }
-const T = dictionary();
+const I18N = core();
+const LANGS = Object.keys(I18N.langs).filter((l) => l !== "en");
+/** public/i18n/<lang>.js: "English": "translation" */
+function words(lang) {
+  const sandbox = { window: {} };
+  vm.runInNewContext(read(`i18n/${lang}.js`), sandbox);
+  return sandbox.window.I18N_WORDS;
+}
+const FILES = Object.fromEntries(LANGS.map((l) => [l, words(l)]));
+const T = FILES.es; // every file has the same keys (checked below)
 
 const decode = (s) => s.replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 const norm = (s) => decode(s).replace(/\s+/g, " ").trim();
@@ -99,13 +108,21 @@ function missing(strings) {
   return [...new Set(strings)].filter((s) => wordy(s) && !KEEP.has(s) && !T[s]);
 }
 
-test("every key has a Spanish and a Russian line with the same {slots}", () => {
+test("the six languages, one file each, all with the same keys and {slots}", () => {
+  assert.deepEqual(Object.keys(I18N.langs), ["en", "es", "ru", "ja", "zh", "ko"]);
+  const keys = Object.keys(T).sort();
+  assert.ok(keys.length > 300);
   const bad = [];
-  for (const [en, tr] of Object.entries(T)) {
-    if (!Array.isArray(tr) || tr.length !== 2 || tr.some((s) => typeof s !== "string" || !s.trim())) { bad.push(`${en}: needs [es, ru]`); continue; }
-    const slots = (s) => (s.match(/\{\w+\}/g) || []).sort().join();
-    for (const s of tr) if (slots(s) !== slots(en)) bad.push(`${en}: {slots} differ in "${s}"`);
-    if (en !== en.replace(/\s+/g, " ").trim()) bad.push(`${en}: key has extra whitespace`);
+  const slots = (s) => (s.match(/\{\w+\}/g) || []).sort().join();
+  for (const [lang, W] of Object.entries(FILES)) {
+    const mine = Object.keys(W).sort();
+    for (const k of keys) if (!(k in W)) bad.push(`${lang}: missing "${k}"`);
+    for (const k of mine) if (!(k in T)) bad.push(`${lang}: extra "${k}"`);
+    for (const [en, tr] of Object.entries(W)) {
+      if (typeof tr !== "string" || !tr.trim()) bad.push(`${lang}: "${en}" is empty`);
+      else if (slots(tr) !== slots(en)) bad.push(`${lang}: {slots} differ in "${en}" -> "${tr}"`);
+      if (en !== en.replace(/\s+/g, " ").trim()) bad.push(`${lang}: key "${en}" has extra whitespace`);
+    }
   }
   assert.deepEqual(bad, []);
 });
@@ -135,6 +152,11 @@ test("what the accounts server says is all translated", () => {
 });
 
 test("the sign-in code email comes in the reader's language", () => {
+  assert.deepEqual(EMAIL_LANGS, Object.keys(I18N.langs));
+  for (const l of EMAIL_LANGS) assert.ok(codeEmail("123456", l).subject.includes("123456") && codeEmail("123456", l).text.includes("123456"), l);
+  assert.match(codeEmail("123456", "ja").subject, /ログインコード/);
+  assert.match(codeEmail("123456", "zh").html, /<html lang="zh-CN">[\s\S]*验证码/);
+  assert.match(codeEmail("123456", "ko").text, /로그인 코드/);
   assert.match(codeEmail("123456", "es").subject, /^123456 es tu código/);
   assert.match(codeEmail("123456", "ru").text, /Ваш код для входа в RougeChain Store: 123456/);
   assert.match(codeEmail("123456", "ru").html, /<html lang="ru">/);
