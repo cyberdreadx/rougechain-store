@@ -140,7 +140,7 @@
 
   function walletButton() {
     var label = !window.rougechain && PHONE ? "Continue with Qwalla" : "Continue with RougeChain wallet";
-    return '<button class="rc-wallet" type="button" data-wallet><img src="img/rougechain.png" alt=""><span>' + label + "</span></button>";
+    return '<button class="rc-wallet" type="button" data-wallet><img src="icons/ring-64.png" alt=""><span>' + label + "</span></button>";
   }
   function codeField() {
     return '<input class="rc-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" aria-label="6-digit code" required>';

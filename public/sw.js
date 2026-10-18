@@ -6,12 +6,12 @@
 //   /api/*, other sites      never touched (sign-in and Stripe always go to the network)
 //
 // Raise VERSION when SHELL changes; old copies are deleted when the new worker takes over.
-const VERSION = "rc-store-1";
+const VERSION = "rc-store-2";
 const SHELL = [
   "./", "index.html", "gltch-runner.html", "offline.html",
   "store-config.js", "store.js", "account.js", "app.js", "app.css", "manifest.webmanifest",
   "fonts/fonts.css", "img/rougechain.png", "img/capsule.jpg", "img/kestrel-night.jpg",
-  "icons/icon-192.png", "icons/apple-touch-icon.png",
+  "icons/icon-192.png", "icons/apple-touch-icon.png", "icons/ring-64.png",
   "img/kestrel-night-t.jpg", "img/neonrow-street-t.jpg", "img/nexus-lobby-t.jpg", "img/coldline-platform-t.jpg"
 ];
 

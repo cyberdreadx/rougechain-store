@@ -16,7 +16,7 @@ public/
   sw.js               the service worker: installable, opens offline
   manifest.webmanifest  the app's name, icons, colours and shortcuts
   offline.html        shown for a page the app hasn't saved yet, without a connection
-  icons/              app icons and the install screenshots
+  icons/              app icons (the RougeChain ring mark) and the install screenshots
   fonts/              the game's typefaces, served from the site itself (SIL Open Font License)
   img/                screenshots, weapon renders, the RougeChain logo
 netlify/
