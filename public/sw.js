@@ -6,10 +6,10 @@
 //   /api/*, other sites      never touched (sign-in and Stripe always go to the network)
 //
 // Raise VERSION when SHELL changes; old copies are deleted when the new worker takes over.
-const VERSION = "rc-store-6";
+const VERSION = "rc-store-7";
 const SHELL = [
   "./", "index.html", "gltch-runner.html", "offline.html",
-  "i18n.js", "store-config.js", "store.js", "account.js", "app.js", "app.css", "manifest.webmanifest",
+  "i18n.js", "store-config.js", "store.js", "downloads.js", "store-motion.js", "store-motion.css", "account.js", "app.js", "app.css", "manifest.webmanifest",
   "fonts/fonts.css", "img/rougechain.png", "img/capsule.jpg", "img/kestrel-night.jpg",
   "icons/icon-192.png", "icons/apple-touch-icon.png", "icons/ring-64.png",
   "img/kestrel-night-t.jpg", "img/neonrow-street-t.jpg", "img/nexus-lobby-t.jpg", "img/coldline-platform-t.jpg"
@@ -42,6 +42,9 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
+  // Game archives are several GB. Never put binaries, entitlement links, or
+  // download responses in the installable store's offline cache.
+  if (url.pathname.startsWith("/downloads/") || /\.(zip|exe|pck|7z|msi)$/i.test(url.pathname)) return;
 
   const media = /\.(png|jpe?g|webp|gif|svg|ttf|woff2?)$/i.test(url.pathname);
   if (media) {

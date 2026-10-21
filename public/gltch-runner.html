@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Gltch Runner · RougeChain Store</title>
-<meta name="description" content="Gltch Runner: a cyberpunk FPS from RougeChain Technologies, in Early Access. Kestrel Block, eleven missing days, 16 guns and a katana, 8 arenas.">
+<meta name="description" content="Gltch Runner: a cyberpunk life and combat game in development. Compare the free Kestrel demo with the Early Access edition, in first or third person.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gltch Runner · RougeChain Store">
-<meta property="og:description" content="Gltch Runner: a cyberpunk FPS from RougeChain Technologies, in Early Access. Kestrel Block, eleven missing days, 16 guns and a katana, 8 arenas.">
+<meta property="og:description" content="Gltch Runner: a cyberpunk life and combat game in development. Compare the free Kestrel demo with the Early Access edition, in first or third person.">
 <meta property="og:image" content="https://store.rougechain.io/img/capsule.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="fonts/fonts.css">
@@ -133,6 +133,28 @@ h1.title { margin: 0; font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); lett
 .btn[aria-pressed="true"] { border-color: var(--pink); color: var(--pink); }
 .btn.hot { background: linear-gradient(135deg, var(--crimson), #692f96); border-color: transparent; color: #fff; box-shadow: 0 0 18px rgba(217, 32, 63, .25); }
 .btn.hot:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
+.btn:disabled:hover { filter: none; border-color: var(--line); }
+
+/* edition comparison and download: one paid price, one free demo */
+#demo, #buy-h { scroll-margin-top: 110px; }
+.demo { border: 1px solid rgba(56, 225, 255, .4); background: radial-gradient(ellipse at top right, rgba(56, 225, 255, .1), transparent 65%), var(--panel); }
+.demo-intro { padding: 20px; }
+.demo-kicker { margin: 0 0 8px; font: 600 13px/1.3 var(--ui); letter-spacing: .12em; text-transform: uppercase; color: var(--cyan); }
+.demo h2 { margin: 0 0 8px; font: 700 26px/1.2 var(--ui); letter-spacing: .03em; }
+.demo-intro > p:not(.demo-kicker) { margin: 0 0 16px; color: #c8cfdf; }
+.demo-download { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.demo-download .free { font: 700 18px/1 var(--ui); color: var(--cyan); }
+.demo-status { margin: 10px 0 0 !important; font-size: 13px; color: var(--muted) !important; }
+.edition-scroll { overflow-x: auto; }
+.editions { width: 100%; border-collapse: collapse; font-size: 13px; }
+.editions caption { text-align: left; padding: 0 20px 12px; font: 700 14px/1.3 var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.editions th, .editions td { text-align: left; vertical-align: top; padding: 12px 16px; border-top: 1px solid var(--line); }
+.editions thead th { background: rgba(0, 0, 0, .2); font: 700 15px/1.25 var(--ui); color: var(--cyan); }
+.editions tbody th { width: 22%; font-weight: 600; color: var(--muted); }
+.editions td { width: 39%; }
+.editions td:last-child { background: rgba(255, 63, 143, .035); }
+.edition-note { margin: 0; padding: 14px 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
 
 /* ---------- body: long read + sidebar ---------- */
 .body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 26px; margin-top: 26px; }
@@ -269,12 +291,14 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="store-motion.css">
 </head>
 <body>
 <div class="bar">
   <div class="bar-in">
     <a class="brand" href="index.html" aria-label="RougeChain Store home"><img src="img/rougechain.png" alt=""><span><b>ROUGECHAIN</b> STORE</span></a>
     <nav class="nav" aria-label="Sections">
+      <a href="#demo">Demo</a>
       <a href="#about">About</a>
       <a href="#arsenal">Arsenal</a>
       <a href="#arenas">Arenas</a>
@@ -318,12 +342,13 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
         <dt>Publisher</dt><dd>RougeChain Technologies</dd>
       </dl>
       <div class="tags" aria-label="Tags">
-        <span>Early Access</span><span>Cyberpunk</span><span>FPS</span><span>Story Rich</span><span>Parkour</span><span>Singleplayer</span><span>Multiplayer</span><span>Atmospheric</span>
+        <span>Early Access</span><span>Cyberpunk</span><span>First &amp; third person</span><span>Story Rich</span><span>Parkour</span><span>Singleplayer</span><span>Multiplayer</span><span>Atmospheric</span>
       </div>
     </div>
   </section>
 
   <div class="actions">
+    <a class="btn" href="#demo">Explore the free demo</a>
     <button class="btn" id="wish" type="button" aria-pressed="false" data-wish="gltch-runner">♡ Add to wishlist</button>
     <button class="btn" id="follow" type="button" aria-pressed="false" data-follow="gltch-runner">Follow</button>
     <span class="note">Early Access alpha · Windows · English</span>
@@ -331,6 +356,33 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
 
   <div class="body">
     <div class="main">
+
+      <section class="demo" id="demo" aria-labelledby="demo-h">
+        <div class="demo-intro">
+          <p class="demo-kicker">Windows · Free demo</p>
+          <h2 id="demo-h">Your first night in Kestrel</h2>
+          <p>Start with a narrated opening, meet Mara, and settle into apartment life and local free roam. Then take on bots or friends over LAN in Team Deathmatch and Domination on Helix Yard.</p>
+          <div class="demo-download">
+            <button class="btn" type="button" data-demo-download disabled aria-describedby="demo-status">Download free demo</button>
+            <span class="free">Free</span>
+          </div>
+          <p class="demo-status" id="demo-status" data-demo-status role="status">The demo download is being prepared.</p>
+        </div>
+        <div class="edition-scroll">
+          <table class="editions">
+            <caption>Compare editions</caption>
+            <thead><tr><th scope="col">Included</th><th scope="col">Free demo</th><th scope="col">Early Access edition</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Story</th><td>Mara's opening chapter and Kestrel local free roam</td><td>The opening, Dead Signal, Cold Line and later story contracts</td></tr>
+              <tr><th scope="row">Neighbourhoods</th><td>Kestrel Block</td><td>Kestrel Block and Neon Row</td></tr>
+              <tr><th scope="row">Multiplayer</th><td>Team Deathmatch and Domination on Helix Yard</td><td>All current arenas and modes</td></tr>
+              <tr><th scope="row">Training</th><td>Fire Range tutorial</td><td>Fire Range tutorial</td></tr>
+              <tr><th scope="row">Camera &amp; combat</th><td>First and third person, including third-person cover</td><td>First and third person, including third-person cover</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="edition-note">Neon Row and later story content are exclusive to Early Access. Locked options remain visible in the demo. Both editions are in development; content and performance may change.</p>
+      </section>
 
       <section class="ea" aria-labelledby="ea-h">
         <div class="ea-head">
@@ -344,16 +396,18 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
               <li>Kestrel Block, the story's district, by day, at sunset and at night</li>
               <li>Dead Signal, the first contract, down in NEXUS's Sublevel 3</li>
               <li>Day Two of the eleven days: the Cold Line</li>
-              <li>Flat 306, your bag, the workbench, food, rest and XRGE</li>
+              <li>Apartment life, cooking, local jobs, crafting and bicycle travel</li>
               <li>16 guns and the MonoEdge katana</li>
-              <li>8 arenas and 9 modes, with bots or over LAN</li>
+              <li>8 arenas and 11 modes, including the Fire Range tutorial, with bots or over LAN</li>
+              <li>First- and third-person play in story and multiplayer, with third-person cover</li>
+              <li>Neon Row, AFTERIMAGE and the journey there by Line 6 or taxi</li>
             </ul>
           </div>
           <div class="later">
             <h3>Planned</h3>
             <ul>
-              <li>The rest of the eleven days, each in a place of its own</li>
-              <li>Neon Row as a neighbourhood, home to AFTERIMAGE, reached by Line 6 or taxi</li>
+              <li>Further development of the eleven-day story</li>
+              <li>More polished animation, environments and performance across different PCs</li>
               <li>More of the city to explore</li>
             </ul>
           </div>
@@ -365,12 +419,11 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
         <div class="buy">
           <span class="platform">WINDOWS</span>
           <h3>Buy Gltch Runner (Early Access)</h3>
-          <span class="promo">Early Access launch sale</span>
-          <p>The alpha build: the story of Kestrel Block from Dead Signal on, every arena and mode, and the bots to fill them.</p>
+          <span class="promo">Early Access price</span>
+          <p>The paid edition includes the current story contracts, Neon Row, and all current arenas and modes. This is an unfinished alpha, with ongoing fixes and changes.</p>
           <div class="price-row">
             <div class="price-box" data-price="gltch-runner">
-              <div class="disc" aria-label="33 percent off">-33%</div>
-              <div class="price"><span class="was"><span class="visually-hidden">Was </span>$30.00</span><span class="now">$20.00</span></div>
+              <div class="price"><span class="now">$20.00</span></div>
               <button class="btn hot" type="button" data-add="gltch-runner">Add to cart</button>
             </div>
           </div>
@@ -397,13 +450,13 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
 
       <section class="about" id="about" aria-labelledby="about-h">
         <h2 class="sec" id="about-h">About this game</h2>
-        <p class="lede">Gltch Runner is a first-person shooter set in Kestrel Block, a few streets of a vertical city that keep their own hours. Someone took eleven days out of your head and filed them under another name. The neighbourhood knows more than it says.</p>
+        <p class="lede">Gltch Runner blends cyberpunk city life with first- and third-person combat. Someone took eleven days out of your head and filed them under another name. Make a home in Kestrel Block, take work from its locals, and follow the story beyond your doorstep.</p>
 
         <div class="feature">
           <figure><img src="img/kestrel-sunset.jpg" alt="The avenue at sunset under a pink sky, cherry trees on both pavements"><figcaption>The avenue at sunset</figcaption></figure>
           <div>
             <h3>A block that <em>lives</em></h3>
-            <p>Kestrel Block is a place to walk end to end, not a mission menu. Your neighbours take Line 6 to work, eat at KOMA Night Kitchen, do their washing at the Spin Cycle and spend their evenings at AFTERIMAGE.</p>
+            <p>Meet the locals around Kestrel Block, pick up paid work, stock your kitchen and return to flat 306. In Early Access, ride Line 6 to Neon Row and visit AFTERIMAGE.</p>
             <p>Morning smog turns to a pink sunset and then a wet neon night. When it rains, the street fills with reflections.</p>
             <div class="facts-line">Day · sunset · night · rain</div>
           </div>
@@ -414,7 +467,7 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
           <div>
             <h3>Eleven <em>days</em></h3>
             <p>Dead Signal takes you down into NEXUS's Sublevel 3. After it come the eleven days themselves. Vale bottled them, and a bottled day won't take without its anchor: something real from the place it happened.</p>
-            <p>So every contract is a place of its own, one you'll only see once. Get the anchor, bring it home, and remember.</p>
+            <p>Recover an anchor, bring it home, and remember. The opening introduces your place in the block before the story leads down into NEXUS and out along the Cold Line.</p>
             <div class="facts-line">Day Two · The Cold Line · Halt 14</div>
           </div>
         </div>
@@ -430,10 +483,11 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
         </div>
 
         <div class="feature flip">
-          <figure><img src="img/neonrow-street.jpg" alt="Neon Row at night in the rain, signs stacked up the towers"><figcaption>Neon Row, team deathmatch</figcaption></figure>
+          <figure><img src="img/neonrow-street.jpg" alt="Neon Row at night in the rain, signs stacked up the towers"><figcaption>Neon Row · Early Access only</figcaption></figure>
           <div>
             <h3>Move like a <em>runner</em></h3>
             <p>Sprint, slide, double jump, mantle and run along walls. Tap to hack, put a drone up, throw a grenade, or holster the gun and draw the MonoEdge.</p>
+            <p>Switch between first person and an over-the-shoulder view in story or multiplayer. Use walls and crates for cover, then peek out to aim.</p>
             <div class="facts-line">Wall run · slide · double jump · mantle · hacks · drones</div>
           </div>
         </div>
@@ -445,12 +499,12 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
       </section>
 
       <section id="arenas" aria-labelledby="are-h">
-        <h2 class="sec" id="are-h">Arenas <small>against bots, or friends on your network</small></h2>
+        <h2 class="sec" id="are-h">Arenas <small>the Early Access lineup</small></h2>
         <div class="chips" style="margin-bottom:10px">
           <span>Helix Yard</span><span>Sublevel 9</span><span>Apex Terraces</span><span>Neontown</span><span>Byte Street</span><span>Skyline Reach</span><span>Neon Row</span><span>Fire Range</span>
         </div>
         <div class="chips modes">
-          <span>Team Deathmatch</span><span>Free For All</span><span>Gun Game</span><span>Domination</span><span>Search &amp; Destroy</span><span>Rush</span><span>Infestation</span><span>Katana Only</span><span>Data War</span>
+          <span>Team Deathmatch</span><span>Free For All</span><span>Gun Game</span><span>Domination</span><span>Search &amp; Destroy</span><span>Rush</span><span>Infestation / Team Deathmatch</span><span>Infestation / Free For All</span><span>Katana Only</span><span>Fire Range</span><span>Data War</span>
         </div>
       </section>
 
@@ -482,7 +536,7 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
         <h2 class="sec" id="rev-h">Customer reviews</h2>
         <div class="reviews">
           <b>No reviews yet</b>
-          <p>Gltch Runner isn't out, so nobody has reviewed it. Reviews will show here after launch.</p>
+          <p>Customer reviews are not available yet.</p>
         </div>
       </section>
     </div>
@@ -492,6 +546,9 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
         <h4>Features</h4>
         <ul class="feats">
           <li><i>1</i>Single-player story</li>
+          <li><i>◉</i>First &amp; third person</li>
+          <li><i>▰</i>Third-person cover</li>
+          <li><i>♪</i>Narrated story opening</li>
           <li><i>⇄</i>LAN multiplayer</li>
           <li><i>⚙</i>Bots to fight or team with</li>
           <li><i>◎</i>Controller support</li>
@@ -529,6 +586,8 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
 </footer>
 
 <script src="store-config.js"></script>
+<script src="downloads.js"></script>
+<script src="store-motion.js" defer></script>
 <script src="store.js"></script>
 <script src="account.js"></script>
 <script src="app.js"></script>
@@ -537,17 +596,17 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
   var tr = window.I18N ? window.I18N.t : function (s, v) { return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in v ? v[k] : m; }) : s; };
   var SHOTS = [
     ["kestrel-night", "Story", "Kestrel Block at half past nine, in the rain"],
-    ["neonrow-street", "Arena", "Neon Row: team deathmatch down a street canyon"],
+    ["neonrow-street", "Early Access only", "Neon Row: team deathmatch down a street canyon"],
     ["kestrel-sunset", "Story", "Sunset over the avenue"],
-    ["nexus-lobby", "Dead Signal", "The NEXUS black site, Sublevel 3"],
-    ["coldline-platform", "Day Two", "Halt 14 on the Cold Line"],
-    ["neonrow-low", "Arena", "Rain on Neon Row"],
+    ["nexus-lobby", "Early Access only", "The NEXUS black site, Sublevel 3"],
+    ["coldline-platform", "Early Access only", "Halt 14 on the Cold Line"],
+    ["neonrow-low", "Early Access only", "Rain on Neon Row"],
     ["kestrel-day", "Story", "The avenue at ten in the morning"],
-    ["nexus-breach", "Dead Signal", "Containment breach"],
-    ["coldline-red", "Day Two", "The halt goes to red"],
+    ["nexus-breach", "Early Access only", "Containment breach"],
+    ["coldline-red", "Early Access only", "The halt goes to red"],
     ["kestrel-above", "Story", "Kestrel Block from above"],
     ["kestrel-garden", "Story", "Kestrel Garden"],
-    ["neonrow-lane", "Arena", "A service lane off Neon Row"]
+    ["neonrow-lane", "Early Access only", "A service lane off Neon Row"]
   ];
   var GUNS = [
     ["G17", "Pistol"], ["VOLT-9", "SMG"], ["HELIX-5", "Assault rifle"], ["BREACH-12", "Shotgun"],

@@ -1,0 +1,106 @@
+/* Loading-screen accents without a loading screen. All decoration is inert;
+   the page is readable before JavaScript, and motion uses transform/opacity. */
+:root { --rc-motion-state: paused; --rc-neon: #38e1ff; --rc-magenta: #ff3f8f; }
+html.rc-motion-ready:not(.rc-motion-paused) { --rc-motion-state: running; }
+
+.featured, .hero, .demo { position: relative; isolation: isolate; }
+.featured::after, .hero::after, .demo::after {
+  content: ""; position: absolute; inset: -1px; z-index: 2; pointer-events: none;
+  background:
+    linear-gradient(var(--rc-neon), var(--rc-neon)) left top / 40px 2px no-repeat,
+    linear-gradient(var(--rc-neon), var(--rc-neon)) left top / 2px 24px no-repeat,
+    linear-gradient(var(--rc-magenta), var(--rc-magenta)) right bottom / 40px 2px no-repeat,
+    linear-gradient(var(--rc-magenta), var(--rc-magenta)) right bottom / 2px 24px no-repeat;
+  opacity: .8;
+}
+.featured::before, .hero::before, .demo::before {
+  content: ""; position: absolute; left: 0; top: -1px; width: 24%; height: 2px;
+  z-index: 3; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--rc-neon) 70%, #e2fcff);
+}
+
+/* A thin signal travelling through the header. It never covers controls. */
+.bar::after {
+  content: ""; position: absolute; bottom: -1px; left: 0; width: 24%; height: 1px;
+  pointer-events: none; opacity: .55;
+  background: linear-gradient(90deg, transparent, var(--rc-magenta), var(--rc-neon), transparent);
+}
+.shelf-head, h2.sec { position: relative; }
+.shelf-head::after, h2.sec::after {
+  content: ""; position: absolute; left: 0; bottom: -1px; width: 54px; height: 2px;
+  pointer-events: none; background: linear-gradient(90deg, var(--rc-neon), transparent);
+}
+
+/* Screen-edge details stay outside the legible caption and screenshot controls. */
+.f-art::after, .stage::after {
+  content: ""; position: absolute; inset: 12px; z-index: 1; pointer-events: none;
+  border-left: 1px solid rgba(56, 225, 255, .22);
+  border-right: 1px solid rgba(255, 63, 143, .22);
+  background:
+    repeating-linear-gradient(180deg, rgba(56, 225, 255, .7) 0 1px, transparent 1px 10px) left 35% / 5px 41px no-repeat,
+    repeating-linear-gradient(180deg, rgba(255, 63, 143, .6) 0 1px, transparent 1px 10px) right 65% / 5px 41px no-repeat;
+}
+.stage .cap, .stage .tag, .stage .arrow, .f-flag { z-index: 2; }
+
+/* The previous title glitch clipped letters. Keep the title intact throughout. */
+h1.title { animation: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .bar::after { animation: rc-signal 9s linear infinite; animation-play-state: var(--rc-motion-state); }
+  .featured, .hero, .demo { --rc-frame-state: paused; }
+  html.rc-motion-ready:not(.rc-motion-paused) .rc-motion-visible { --rc-frame-state: running; }
+  .featured::before, .hero::before, .demo::before {
+    animation: rc-signal 6.5s cubic-bezier(.25, .1, .25, 1) infinite;
+    animation-play-state: var(--rc-frame-state);
+  }
+  .demo::before { animation-delay: -2s; }
+  .featured::after, .hero::after, .demo::after {
+    animation: rc-frame-breathe 5s ease-in-out infinite;
+    animation-play-state: var(--rc-frame-state);
+  }
+  .rc-motion-enter {
+    animation: rc-arrive .55s cubic-bezier(.2, .75, .25, 1) both;
+    animation-play-state: var(--rc-motion-state);
+  }
+  .dept, .card:not(.blank), .update, .soon-shelf {
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .btn:not(:disabled), .pill-btn, .thumb, .minis button {
+    transition: transform .18s ease, border-color .18s ease, background-color .18s ease;
+  }
+  .btn:not(:disabled):active, .pill-btn:active { transform: translateY(1px); }
+  .btn.hot, .btn.buy { position: relative; overflow: hidden; }
+  .btn.hot::after, .btn.buy::after {
+    content: ""; position: absolute; inset: -30% auto -30% -55%; width: 35%;
+    pointer-events: none; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .16), transparent);
+    transform: translateX(0) skewX(-20deg);
+  }
+  .btn.hot:not(:disabled):is(:hover, :focus-visible)::after,
+  .btn.buy:not(:disabled):is(:hover, :focus-visible)::after {
+    animation: rc-button-light .65s ease-out both;
+    animation-play-state: var(--rc-motion-state);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .dept:hover, .card:not(.blank):hover, .update:hover { transform: translateY(-3px); border-color: #3f6a80; }
+    .btn:not(:disabled):hover, .pill-btn:hover { transform: translateY(-1px); }
+    .thumb:hover, .minis button:hover { transform: translateY(-2px); }
+  }
+}
+
+@keyframes rc-signal {
+  0% { transform: translateX(0); opacity: 0; }
+  10% { opacity: .85; }
+  82% { opacity: .85; }
+  100% { transform: translateX(316%); opacity: 0; }
+}
+@keyframes rc-frame-breathe { 0%, 100% { opacity: .55; } 50% { opacity: .95; } }
+@keyframes rc-arrive { from { opacity: .88; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes rc-button-light { to { transform: translateX(510%) skewX(-20deg); } }
+
+/* The preference also stops hover zoom inherited from the original home page. */
+@media (prefers-reduced-motion: reduce) {
+  .featured::before, .hero::before, .demo::before { display: none; }
+  .bar::after, .featured::after, .hero::after, .demo::after,
+  .rc-motion-enter, h1.title { animation: none !important; }
+  .featured:hover .f-art img, .rc-motion-enter { transform: none !important; opacity: 1; }
+}

@@ -15,7 +15,7 @@
 
   // ---- what the store sells (prices in cents)
   var PRODUCTS = {
-    "gltch-runner": { name: "Gltch Runner", kind: "Early Access · Windows", was: 3000, now: 2000, pic: "img/capsule.jpg", page: "gltch-runner.html" }
+    "gltch-runner": { name: "Gltch Runner", kind: "Early Access · Windows", was: 2000, now: 2000, pic: "img/capsule.jpg", page: "gltch-runner.html" }
   };
 
   function money(c) { return "$" + (c / 100).toFixed(2); }

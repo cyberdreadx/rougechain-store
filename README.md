@@ -9,12 +9,14 @@ public/
   index.html          the homepage: featured game, departments, offers, shelves
   gltch-runner.html   Gltch Runner's page: screenshots, Early Access, buy box, about, arsenal, arenas
   thanks.html         where Stripe sends a buyer after paying
-  store-config.js     THE FILE YOU EDIT: Stripe links, email signup, contact, policy links
+  store-config.js     THE FILE YOU EDIT: Stripe links, free demo delivery, signup, contact, policies
+  downloads.js        enables the free demo button only for a published HTTPS download
   store.js            prices, cart, checkout, wishlist (prices live in PRODUCTS at the top)
   account.js          the Sign in button and account panel (email, password, RougeChain wallet)
   i18n.js             picks the language and swaps in its words (see Languages)
   i18n/               the words: es, ru, ja, zh, ko, one file each
   app.js, app.css     the store as an app: tab bar, sheets, swipes, install hint (phones)
+  store-motion.css, store-motion.js  neon framing, signal sweeps and motion accessibility
   sw.js               the service worker: installable, opens offline
   manifest.webmanifest  the app's name, icons, colours and shortcuts
   offline.html        shown for a page the app hasn't saved yet, without a connection
@@ -25,7 +27,7 @@ netlify/
   functions/api.mjs   the accounts API, served at /api/*
   lib/accounts.mjs    its routes: email codes, passwords, Sign-In with RougeChain, linking, lists
   lib/…               sessions and hashing, the Resend email, the Netlify Blobs store
-test/                 the API's and the translations' tests (npm test)
+test/                 API, translations, download delivery and motion tests (npm test)
 preview.py            makes a claude.ai preview page from public/index.html
 netlify.toml          tells Netlify to publish public/ and where the function is
 package.json          the function's two dependencies: @rougechain/sdk and @netlify/blobs
@@ -75,21 +77,67 @@ The signup form says the address is only used for RougeChain releases. Set `priv
 2. **Decide who handles sales tax.**
    - **Managed Payments:** Stripe acts as the merchant of record for digital products. It works out, collects and pays sales tax and VAT, and handles fraud and disputes, for an extra fee per sale. Check Stripe's pricing page and whether your account is eligible.
    - **Standard Stripe with Stripe Tax:** cheaper per sale, but RougeChain is the seller of record. Stripe Tax calculates and collects the tax; you register and file. Selling digital goods to EU or UK buyers from outside them means VAT is owed from the first sale. US states have their own thresholds.
-3. **Add the product:** Products > Add product, "Gltch Runner (Early Access)", one-time price **$20.00 USD**. The crossed-out $30.00 only exists on the site, in `store.js`.
+3. **Add the product:** Products > Add product, "Gltch Runner (Early Access)", one-time price **$20.00 USD**. The site shows this price without a discount or crossed-out comparison price.
 4. **Make a Payment Link** for it. Under After payment, choose not to show Stripe's confirmation page and redirect to `https://store.rougechain.io/thanks.html`.
 5. **Test it first.** In Stripe's test mode, make the same link (its URL has `test_` in it) and put it in `checkout["gltch-runner"]`. Deploy, then buy with the card `4242 4242 4242 4242`, any future date and any CVC. You should land on the thanks page, and the payment should show in Stripe.
 6. **Go live:** swap the test link for the live one and deploy again.
 
-**Delivering the game:** Stripe takes the money; it doesn't send the game. Every sale shows up in Stripe > Payments with the buyer's email. For the alpha, send each buyer a download key by hand (itch.io: your game > Distribute > Download keys). Once sales are steady, a Stripe webhook can send keys automatically. That needs a small server function.
+**Delivering Early Access:** Stripe takes the money; it doesn't send the game. Paid delivery remains external to this repository. After confirming the payment, issue the buyer a private download key through the chosen delivery provider (for example, itch.io: your game > Distribute > Download keys). An automated service must verify the Stripe webhook and purchase entitlement before issuing a key or temporary download URL. A visit to `thanks.html` or a store sign-in is not proof of purchase. Do not publish the paid EXE/ZIP or private keys in `public/`, `store-config.js`, or a public release.
 
 **Merch:** Managed Payments covers digital products only. Physical merch needs shipping and tax handled separately, either with standard Stripe and Stripe Tax or through a print-on-demand shop.
 
-## Changing a price or ending the sale
+## Changing a price
 
-- **On the site:** edit `PRODUCTS` at the top of `public/store.js`. `was` and `now` are in cents (3000 = $30.00). Every price box, the discount badge and the cart follow it. With `was` equal to `now`, the badge and the crossed-out price disappear.
+- **On the site:** edit `PRODUCTS` at the top of `public/store.js`. `was` and `now` are in cents. Early Access currently sets both to `2000` ($20.00), so every price box and the cart agree and no discount badge or crossed-out price appears. Only add a comparison price when it represents an actual offer.
 - **On Stripe:** add a new price to the product and make a new Payment Link for it. Stripe charges whatever its link says.
 
 Nothing in `store-config.js` is secret: Payment Links are meant to be public. Never put a Stripe secret key in this site.
+
+## Publish the free demo download
+
+The free demo has its own delivery setting, independent of paid checkout:
+`STORE.downloads["gltch-runner-demo"]` in `public/store-config.js`. Its current metadata is:
+
+```js
+{
+  published: false,
+  url: "",
+  version: "0.2.0-demo.4",
+  bytes: 3853683482,
+  sha256: "bbf2181dcfea78224a4fb5739e8e1db42855937de44ad72e22e6213e87f2c151"
+}
+```
+
+This describes `GltchRunnerDemo-0.2.0-demo.4-Windows.zip` (3.85 GB). Upload the complete archive to
+the selected download host, check the downloaded file's byte count and SHA-256, and confirm that a
+signed-out visitor can download it. Then set `url` to that verified absolute HTTPS URL and
+`published` to `true`, and deploy the site. Until both values are valid, the download button stays
+disabled and its status says the download is being prepared. URLs containing a username/password are rejected.
+
+For a new demo version, replace the version, byte count and checksum together with its URL. The
+checksum is release metadata for verification; the browser does not fetch and hash the ZIP. Test the
+actual hosted download before enabling it. The archive belongs on a download host, not in the
+Netlify site's `public/` directory or this Git repository.
+
+Only the **free demo** belongs in this public configuration. The paid Early Access build stays
+behind the delivery provider's purchase entitlement or download-key system described above.
+
+## Storefront motion
+
+The homepage and game page include `store-motion.css` and `store-motion.js`. They add cyan/magenta
+corner frames, slow signal sweeps, screen-edge accents, one-time panel entrances and button/card
+feedback. Content is immediately usable: there is no loading gate, fake progress bar, canvas,
+video background, animation timer or scroll handler.
+
+`prefers-reduced-motion` keeps the decoration static, including when the preference changes while
+the page is open. Offscreen panels pause their looping accents. Hidden tabs and page suspension
+pause animation and disconnect the observers; returning resumes visible panels without replaying
+their entrances. Without JavaScript, content and controls remain visible and usable. The motion
+layer does not capture pointer input or change mobile sheets and the sticky purchase controls.
+
+The focused lifecycle checks run with `node --test test/store-motion.test.mjs`; `npm test` includes
+them with the rest of the store checks. Keep both motion files and `downloads.js` in the service
+worker's `SHELL` list when updating the offline app.
 
 ## Accounts and sign-in
 

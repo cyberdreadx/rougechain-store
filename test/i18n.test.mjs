@@ -147,14 +147,14 @@ test("the pages' text is all translated", () => {
 });
 
 test("what the scripts write is all translated", () => {
-  const sources = ["store.js", "account.js", "app.js"].map(read);
+  const sources = ["store.js", "downloads.js", "account.js", "app.js"].map(read);
   for (const f of ["index.html", "gltch-runner.html"]) sources.push(...[...read(f).matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]));
   const found = sources.flatMap(scriptStrings);
   assert.ok(found.length > 80, `found only ${found.length} strings: the extractor is broken`);
   assert.deepEqual(missing(found), []);
   // the product kind and the game page's generated text
   assert.ok(T["Early Access · Windows"]);
-  for (const s of ["Pistol", "SMG", "Assault rifle", "Shotgun", "Sniper rifle", "Rocket launcher", "EM sniper rifle", "Plasma rifle", "Story", "Arena", "Day Two"]) assert.ok(T[s], s);
+  for (const s of ["Pistol", "SMG", "Assault rifle", "Shotgun", "Sniper rifle", "Rocket launcher", "EM sniper rifle", "Plasma rifle", "Story", "Arena", "Day Two", "Early Access only"]) assert.ok(T[s], s);
 });
 
 test("what the accounts server says is all translated", () => {
