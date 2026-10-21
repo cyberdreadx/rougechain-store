@@ -441,5 +441,8 @@ window.I18N_WORDS = {
   "Early Access · story, city life and multiplayer · Windows": "抢先体验 · 剧情、城市生活与多人模式 · Windows",
   "Early Access only": "仅限抢先体验版",
   "Windows x64 · {version} · {size} GB": "Windows x64 · {version} · {size} GB",
-  "Windows x64 · ZIP download": "Windows x64 · ZIP 下载"
+  "Windows x64 · ZIP download": "Windows x64 · ZIP 下载",
+  "Download free demo on itch.io": "在 itch.io 下载免费试玩版",
+  "Windows x64 · {version} · itch.io": "Windows x64 · {version} · itch.io",
+  "Windows x64 · itch.io": "Windows x64 · itch.io"
 };

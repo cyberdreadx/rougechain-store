@@ -441,5 +441,8 @@ window.I18N_WORDS = {
   "Early Access · story, city life and multiplayer · Windows": "Acceso anticipado · historia, vida urbana y multijugador · Windows",
   "Early Access only": "Solo en acceso anticipado",
   "Windows x64 · {version} · {size} GB": "Windows x64 · {version} · {size} GB",
-  "Windows x64 · ZIP download": "Windows x64 · Descarga ZIP"
+  "Windows x64 · ZIP download": "Windows x64 · Descarga ZIP",
+  "Download free demo on itch.io": "Descargar demo gratuita en itch.io",
+  "Windows x64 · {version} · itch.io": "Windows x64 · {version} · itch.io",
+  "Windows x64 · itch.io": "Windows x64 · itch.io"
 };

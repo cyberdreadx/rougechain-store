@@ -441,5 +441,8 @@ window.I18N_WORDS = {
   "Early Access · story, city life and multiplayer · Windows": "앞서 해보기 · 스토리, 도시 생활과 멀티플레이 · Windows",
   "Early Access only": "앞서 해보기 전용",
   "Windows x64 · {version} · {size} GB": "Windows x64 · {version} · {size} GB",
-  "Windows x64 · ZIP download": "Windows x64 · ZIP 다운로드"
+  "Windows x64 · ZIP download": "Windows x64 · ZIP 다운로드",
+  "Download free demo on itch.io": "itch.io에서 무료 체험판 다운로드",
+  "Windows x64 · {version} · itch.io": "Windows x64 · {version} · itch.io",
+  "Windows x64 · itch.io": "Windows x64 · itch.io"
 };

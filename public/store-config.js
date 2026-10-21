@@ -6,16 +6,23 @@ window.STORE = {
     "gltch-runner": ""
   },
 
-  // Public FREE demo only. Set the verified HTTPS download URL and published:true
-  // after uploading and checking the complete ZIP. Keep paid Early Access files
+  // Public FREE demo only. Enable published:true after the uploaded build and
+  // signed-out itch.io download are verified. Keep the stable project page URL,
+  // not an expiring CDN download URL. Keep paid Early Access files
   // behind the sales provider's entitlement/download-key system, not in this file.
   downloads: {
     "gltch-runner-demo": {
-      published: false,
-      url: "",
-      version: "0.2.0-demo.4",
-      bytes: 3853683482,
-      sha256: "bbf2181dcfea78224a4fb5739e8e1db42855937de44ad72e22e6213e87f2c151"
+      published: true,
+      provider: "itch.io",
+      url: "https://cyberdreadx.itch.io/gltch-runner-demo-v01",
+      version: "0.2.0-demo.5",
+      // Provenance of the ZIP supplied to Butler. itch.io repackages its contents;
+      // these are not the size/checksum of itch.io's generated downloads.
+      sourceArchive: {
+        filename: "GltchRunnerDemo-0.2.0-demo.5-Windows.zip",
+        bytes: 3853682434,
+        sha256: "39f086cffab5f21ab6777c9bcb3e9d9bdbda1c3d77c4de3bfd0e301294c1903d"
+      }
     }
   },
 

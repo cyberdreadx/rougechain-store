@@ -10,15 +10,17 @@
     try {
       var url = new URL(config.url);
       if (url.protocol !== "https:" || url.username || url.password) return "";
+      if (config.provider === "itch.io" && url.hostname !== "itch.io" && !url.hostname.endsWith(".itch.io")) return "";
       return url.href;
     } catch (_) { return ""; }
   }
   var config = S.downloads && S.downloads["gltch-runner-demo"];
   var url = demoUrl(config);
+  var itch = config && config.provider === "itch.io";
   document.querySelectorAll("[data-demo-download]").forEach(function (button) {
     button.disabled = !url;
     button.setAttribute("aria-disabled", String(!url));
-    button.textContent = t("Download free demo");
+    button.textContent = itch ? t("Download free demo on itch.io") : t("Download free demo");
     button.addEventListener("click", function (event) {
       event.preventDefault();
       // Re-check at activation as well: stale/offline controls cannot bypass the gate.
@@ -30,6 +32,13 @@
   document.querySelectorAll("[data-demo-status]").forEach(function (node) {
     if (!url) { node.textContent = t("The demo download is being prepared."); return; }
     var version = typeof config.version === "string" ? config.version : "";
+    if (itch) {
+      // Butler publishes contents, not the original source ZIP byte-for-byte.
+      node.textContent = version
+        ? t("Windows x64 · {version} · itch.io", { version: version })
+        : t("Windows x64 · itch.io");
+      return;
+    }
     var bytes = Number(config.bytes);
     node.textContent = version && Number.isFinite(bytes) && bytes > 0
       ? t("Windows x64 · {version} · {size} GB", { version: version, size: (bytes / 1000000000).toFixed(2) })

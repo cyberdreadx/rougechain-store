@@ -101,23 +101,34 @@ The free demo has its own delivery setting, independent of paid checkout:
 ```js
 {
   published: false,
-  url: "",
-  version: "0.2.0-demo.4",
-  bytes: 3853683482,
-  sha256: "bbf2181dcfea78224a4fb5739e8e1db42855937de44ad72e22e6213e87f2c151"
+  provider: "itch.io",
+  url: "https://cyberdreadx.itch.io/gltch-runner-demo-v01",
+  version: "0.2.0-demo.5",
+  sourceArchive: {
+    filename: "GltchRunnerDemo-0.2.0-demo.5-Windows.zip",
+    bytes: 3853682434,
+    sha256: "39f086cffab5f21ab6777c9bcb3e9d9bdbda1c3d77c4de3bfd0e301294c1903d"
+  }
 }
 ```
 
-This describes `GltchRunnerDemo-0.2.0-demo.4-Windows.zip` (3.85 GB). Upload the complete archive to
-the selected download host, check the downloaded file's byte count and SHA-256, and confirm that a
-signed-out visitor can download it. Then set `url` to that verified absolute HTTPS URL and
-`published` to `true`, and deploy the site. Until both values are valid, the download button stays
-disabled and its status says the download is being prepared. URLs containing a username/password are rejected.
+Upload the verified archive with Butler to `cyberdreadx/gltch-runner-demo-v01:windows-demo` with
+`--userversion 0.2.0-demo.5`. After the upload, verify the channel's version and downloaded build
+contents, and confirm that a signed-out visitor can reach the public project page and download
+the demo for free. Only then set `published` to `true` and deploy the site. Until it is enabled,
+the download button stays disabled and its status says the download is being prepared.
 
-For a new demo version, replace the version, byte count and checksum together with its URL. The
-checksum is release metadata for verification; the browser does not fetch and hash the ZIP. Test the
-actual hosted download before enabling it. The archive belongs on a download host, not in the
-Netlify site's `public/` directory or this Git repository.
+Keep the stable itch.io project URL instead of a temporary signed CDN download URL. The button
+says **Download free demo on itch.io** and shows the version/provider. Its HTTPS URL must have an
+`itch.io` or `*.itch.io` hostname; credentials in a URL are rejected. The `-v01` project slug is
+the existing delivery destination, not the build's version.
+
+`sourceArchive` describes the original 3.85 GB ZIP given to Butler. Butler uploads its contents,
+and itch.io generates its own download archives and patches. The original ZIP's size and SHA-256
+are source provenance, not a claim about itch.io's generated download. The page does not display
+that source size, and the browser does not fetch or hash the ZIP. For a new version, update the
+version and source metadata together and verify the hosted build before enabling it. Archives
+belong on the download host, not in Netlify's `public/` directory or this Git repository.
 
 Only the **free demo** belongs in this public configuration. The paid Early Access build stays
 behind the delivery provider's purchase entitlement or download-key system described above.
