@@ -444,5 +444,8 @@ window.I18N_WORDS = {
   "Windows x64 · ZIP download": "Windows x64 · ZIP 다운로드",
   "Download free demo on itch.io": "itch.io에서 무료 체험판 다운로드",
   "Windows x64 · {version} · itch.io": "Windows x64 · {version} · itch.io",
-  "Windows x64 · itch.io": "Windows x64 · itch.io"
+  "Windows x64 · itch.io": "Windows x64 · itch.io",
+  "Play GLTCH RUNNER Demo": "GLTCH RUNNER 데모 플레이",
+  "Opening story, Kestrel free roam, Team Deathmatch and Domination.": "이야기의 시작, Kestrel 자유 탐험, 팀 데스매치와 점령전.",
+  "FREE DEMO · WINDOWS x64": "무료 데모 · WINDOWS x64"
 };

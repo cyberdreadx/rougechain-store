@@ -444,5 +444,8 @@ window.I18N_WORDS = {
   "Windows x64 · ZIP download": "Windows x64 · Descarga ZIP",
   "Download free demo on itch.io": "Descargar demo gratuita en itch.io",
   "Windows x64 · {version} · itch.io": "Windows x64 · {version} · itch.io",
-  "Windows x64 · itch.io": "Windows x64 · itch.io"
+  "Windows x64 · itch.io": "Windows x64 · itch.io",
+  "Play GLTCH RUNNER Demo": "Juega a la demo de GLTCH RUNNER",
+  "Opening story, Kestrel free roam, Team Deathmatch and Domination.": "Inicio de la historia, exploración libre de Kestrel, Duelo por equipos y Dominación.",
+  "FREE DEMO · WINDOWS x64": "DEMO GRATUITA · WINDOWS x64"
 };

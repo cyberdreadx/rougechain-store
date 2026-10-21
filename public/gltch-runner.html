@@ -136,6 +136,25 @@ h1.title { margin: 0; font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); lett
 .btn:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
 .btn:disabled:hover { filter: none; border-color: var(--line); }
 
+/* Free demo stays in view beside the gallery, then gets its own launch band. */
+.summary-demo { display: grid; gap: 9px; padding: 14px; background: #16211c; border: 1px solid #4c6640; border-top: 3px solid #dcff9b; }
+.demo-label { margin: 0; color: #dcff9b; font: 700 13px/1.4 var(--mono); letter-spacing: .08em; }
+.btn.demo-cta { justify-content: center; width: 100%; min-width: 0; min-height: 56px; padding: 14px 20px; border: 1px solid #e7ffba; background: linear-gradient(135deg, #f6ffda, #c8f684); color: #111b0b; font: 700 19px/1.2 var(--ui); letter-spacing: .025em; text-transform: none; text-align: center; white-space: normal; overflow-wrap: anywhere; box-shadow: 0 0 24px rgba(192, 250, 117, .1); }
+.btn.demo-cta:not(:disabled):hover { background: #f5ffe0; border-color: #fff; color: #0a1205; box-shadow: 0 0 24px rgba(192, 250, 117, .22); }
+.btn.demo-cta:focus-visible { outline: 3px solid var(--cyan); outline-offset: 4px; }
+.btn.demo-cta:disabled { background: #25322b; border-color: #42513b; color: #b5c2b3; opacity: 1; box-shadow: none; }
+.summary-demo .demo-status { margin: 0 !important; font-size: 12px; line-height: 1.45; }
+.demo.demo-launch { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); align-items: center; gap: 24px; margin-top: 18px; padding: 26px 28px; border-color: #607941; background: radial-gradient(ellipse at top right, rgba(184, 244, 113, .12), transparent 70%), linear-gradient(110deg, #17231f, #101822); }
+.demo-launch-copy { min-width: 0; }
+.demo.demo-launch h2 { margin: 9px 0; color: #f3f8ec; font: 700 clamp(26px, 3vw, 34px)/1.15 var(--ui); letter-spacing: .025em; }
+.demo-launch-copy > p:last-child { margin: 0; max-width: 60ch; color: #cbd7cc; line-height: 1.55; }
+.demo-launch-action { min-width: 0; }
+.demo-launch-action .demo-status { line-height: 1.45; text-align: center; }
+@media (max-width: 760px) {
+  .demo.demo-launch { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 22px 18px; }
+  .demo-launch-action .demo-status { text-align: left; }
+}
+
 /* edition comparison and download: one paid price, one free demo */
 #demo, #buy-h { scroll-margin-top: 110px; }
 .demo { border: 1px solid rgba(56, 225, 255, .4); background: radial-gradient(ellipse at top right, rgba(56, 225, 255, .1), transparent 65%), var(--panel); }
@@ -144,6 +163,7 @@ h1.title { margin: 0; font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); lett
 .demo h2 { margin: 0 0 8px; font: 700 26px/1.2 var(--ui); letter-spacing: .03em; }
 .demo-intro > p:not(.demo-kicker) { margin: 0 0 16px; color: #c8cfdf; }
 .demo-download { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.demo-download .demo-cta { width: auto; max-width: 100%; }
 .demo-download .free { font: 700 18px/1 var(--ui); color: var(--cyan); }
 .demo-status { margin: 10px 0 0 !important; font-size: 13px; color: var(--muted) !important; }
 .edition-scroll { overflow-x: auto; }
@@ -172,6 +192,21 @@ h2.sec small { font: 400 12px/1 var(--mono); color: var(--muted); letter-spacing
 .price-box { display: flex; align-items: stretch; background: #000; padding: 3px; gap: 3px; }
 .price-box .price { display: grid; place-content: center; padding: 0 14px; font: 400 16px/1 var(--mono); color: var(--text); background: #0b0f19; min-width: 108px; text-align: center; }
 .price-box .price small { display: block; font-size: 10px; color: var(--muted); letter-spacing: .12em; margin-bottom: 3px; }
+.buy-launch { margin-top: 18px; }
+.buy-launch h2.sec { margin-bottom: 8px; font-size: 14px; }
+.buy-launch .buy { grid-template-columns: minmax(0, 1fr) minmax(240px, 340px); grid-template-areas: "heading platform" "label action" "description action"; column-gap: 24px; padding: 20px 28px; }
+.buy-launch .buy h3 { grid-area: heading; }
+.buy-launch .buy .platform { position: static; grid-area: platform; justify-self: end; }
+.buy-launch .buy .promo { grid-area: label; }
+.buy-launch .buy p { grid-area: description; }
+.buy-launch .price-row { grid-area: action; align-self: center; margin-top: 0; min-width: 0; }
+.buy-launch .price-box { width: 100%; }
+.buy-launch .price-box .btn { flex: 1; min-width: 0; min-height: 54px; justify-content: center; text-align: center; line-height: 1.2; overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .buy-launch .buy { grid-template-columns: minmax(0, 1fr); grid-template-areas: "platform" "heading" "label" "description" "action"; gap: 8px; padding: 20px 18px; }
+  .buy-launch .buy .platform { justify-self: start; }
+  .buy-launch .price-row { margin-top: 8px; }
+}
 
 /* updates */
 .updates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -334,6 +369,11 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
         <img src="img/capsule.jpg" alt="Kestrel Block at night: cherry trees, lanterns and a neon sign in the rain">
         <div class="mark"><strong>GLTCH RUNNER</strong><small>Eleven days missing</small></div>
       </div>
+      <div class="summary-demo">
+        <p class="demo-label">FREE DEMO · WINDOWS x64</p>
+        <button class="btn demo-cta" type="button" data-demo-download disabled aria-describedby="demo-summary-status">Download free demo</button>
+        <p class="demo-status" id="demo-summary-status" data-demo-status role="status">The demo download is being prepared.</p>
+      </div>
       <p class="pitch">You wake in flat 306, over a mechanic's workshop, with eleven days cut out of your memory. Kestrel Block keeps its own hours: neighbours, noodle counters, neon in the rain. Every contract takes you somewhere new to win one of those days back.</p>
       <dl class="facts">
         <dt>Reviews</dt><dd class="none">No reviews yet</dd>
@@ -347,8 +387,35 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
     </div>
   </section>
 
+  <section class="demo demo-launch" id="demo" aria-labelledby="demo-launch-h">
+    <div class="demo-launch-copy">
+      <p class="demo-label">FREE DEMO · WINDOWS x64</p>
+      <h2 id="demo-launch-h">Play GLTCH RUNNER Demo</h2>
+      <p>Opening story, Kestrel free roam, Team Deathmatch and Domination.</p>
+    </div>
+    <div class="demo-launch-action">
+      <button class="btn demo-cta" type="button" data-demo-download disabled aria-describedby="demo-launch-status">Download free demo</button>
+      <p class="demo-status" id="demo-launch-status" data-demo-status role="status">The demo download is being prepared.</p>
+    </div>
+  </section>
+
+  <section class="buy-launch" aria-labelledby="buy-h">
+    <h2 class="sec" id="buy-h">Buy Gltch Runner</h2>
+    <div class="buy">
+      <span class="platform">WINDOWS</span>
+      <h3>Buy Gltch Runner (Early Access)</h3>
+      <span class="promo">Early Access price</span>
+      <p>The paid edition includes the current story contracts, Neon Row, and all current arenas and modes. This is an unfinished alpha, with ongoing fixes and changes.</p>
+      <div class="price-row">
+        <div class="price-box" data-price="gltch-runner">
+          <div class="price"><span class="now">$20.00</span></div>
+          <button class="btn hot" type="button" data-add="gltch-runner">Add to cart</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div class="actions">
-    <a class="btn" href="#demo">Explore the free demo</a>
     <button class="btn" id="wish" type="button" aria-pressed="false" data-wish="gltch-runner">♡ Add to wishlist</button>
     <button class="btn" id="follow" type="button" aria-pressed="false" data-follow="gltch-runner">Follow</button>
     <span class="note">Early Access alpha · Windows · English</span>
@@ -357,13 +424,13 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
   <div class="body">
     <div class="main">
 
-      <section class="demo" id="demo" aria-labelledby="demo-h">
+      <section class="demo" id="demo-details" aria-labelledby="demo-h">
         <div class="demo-intro">
           <p class="demo-kicker">Windows · Free demo</p>
           <h2 id="demo-h">Your first night in Kestrel</h2>
           <p>Start with a narrated opening, meet Mara, and settle into apartment life and local free roam. Then take on bots or friends over LAN in Team Deathmatch and Domination on Helix Yard.</p>
           <div class="demo-download">
-            <button class="btn" type="button" data-demo-download disabled aria-describedby="demo-status">Download free demo</button>
+            <button class="btn demo-cta" type="button" data-demo-download disabled aria-describedby="demo-status">Download free demo</button>
             <span class="free">Free</span>
           </div>
           <p class="demo-status" id="demo-status" data-demo-status role="status">The demo download is being prepared.</p>
@@ -410,22 +477,6 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
               <li>More polished animation, environments and performance across different PCs</li>
               <li>More of the city to explore</li>
             </ul>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="buy-h">
-        <h2 class="sec" id="buy-h">Buy Gltch Runner</h2>
-        <div class="buy">
-          <span class="platform">WINDOWS</span>
-          <h3>Buy Gltch Runner (Early Access)</h3>
-          <span class="promo">Early Access price</span>
-          <p>The paid edition includes the current story contracts, Neon Row, and all current arenas and modes. This is an unfinished alpha, with ongoing fixes and changes.</p>
-          <div class="price-row">
-            <div class="price-box" data-price="gltch-runner">
-              <div class="price"><span class="now">$20.00</span></div>
-              <button class="btn hot" type="button" data-add="gltch-runner">Add to cart</button>
-            </div>
           </div>
         </div>
       </section>
