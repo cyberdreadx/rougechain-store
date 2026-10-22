@@ -1,9 +1,16 @@
 // RougeChain Store settings. This is the only file to edit to open the store (README.md has the steps).
 window.STORE = {
-  // A Stripe Payment Link for each product (Stripe Dashboard > Payment Links), e.g.
-  // "https://buy.stripe.com/...". While a product has none, it isn't on sale.
+  // Early Access checkout opens the verified public $20 itch.io project.
+  // For future releases, keep published:false until the public listing and upload are verified.
+  // A legacy "https://buy.stripe.com/..." link also works.
+  // The itch.io URL must be a separate paid project, never the free-demo project,
+  // a private download key, an archive or an expiring CDN URL. See README.md.
   checkout: {
-    "gltch-runner": ""
+    "gltch-runner": {
+      provider: "itch.io",
+      url: "https://cyberdreadx.itch.io/gltch-runner-early-access",
+      published: true
+    }
   },
 
   // Public FREE demo only. Enable published:true after the uploaded build and

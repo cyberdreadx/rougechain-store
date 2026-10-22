@@ -9,7 +9,7 @@ public/
   index.html          the homepage: featured game, departments, offers, shelves
   gltch-runner.html   Gltch Runner's page: screenshots, Early Access, buy box, about, arsenal, arenas
   thanks.html         where Stripe sends a buyer after paying
-  store-config.js     THE FILE YOU EDIT: Stripe links, free demo delivery, signup, contact, policies
+  store-config.js     THE FILE YOU EDIT: checkout provider, free demo delivery, signup, contact, policies
   downloads.js        enables the free demo button only for a published HTTPS download
   store.js            prices, cart, checkout, wishlist (prices live in PRODUCTS at the top)
   account.js          the Sign in button and account panel (email, password, RougeChain wallet)
@@ -40,6 +40,7 @@ The site has three states, and `store-config.js` picks which one shows:
 | nothing filled in | a preview: Add to cart, but checkout says it isn't open yet |
 | `signupAction` set | **Get notified** buttons that open an email signup |
 | a Stripe link in `checkout` | **Add to cart**, and Continue to payment goes to Stripe |
+| a published itch.io checkout object | **Add to cart**, and Continue on itch.io opens the paid project |
 
 ## 1. Put it online at store.rougechain.io
 
@@ -64,7 +65,39 @@ To start a new site instead: Add new site > Import an existing project > GitHub,
 
 The signup form says the address is only used for RougeChain releases. Set `privacyUrl` so it links to your privacy policy.
 
-## 3. Take payments with Stripe
+## 3. Sell Early Access through a separate paid itch.io project
+
+The free demo stays on its existing project. Create a **separate paid project** for Early Access,
+configure its payment account and $20.00 USD minimum price, and upload the Early Access build only
+to that paid project. Confirm its title, edition, price, uploaded version and purchase/download flow
+before activating checkout. A public project page is fine; a direct paid archive or private key is not.
+
+Early Access checkout is enabled for the public project below. A signed-out check verified its
+$20.00 USD minimum price, version `0.2.0-ea.2` Windows download listing and **Pay with Card** option;
+the owner also confirmed the uploaded build is ready. No purchase was completed, so the payment
+receipt and post-purchase download flow have not been tested.
+
+```js
+"gltch-runner": {
+  provider: "itch.io",
+  published: true,
+  url: "https://cyberdreadx.itch.io/gltch-runner-early-access"
+}
+```
+
+Set `published: true` only after that exact project is verified and ready to sell. A draft page may
+return 404 to a signed-out visitor; that does not verify its price or delivery. Checkout accepts a
+creator's `*.itch.io` project page, rejects the configured
+free-demo project, and rejects credentials, custom ports, query strings, fragments and download/archive
+paths. This prevents misrouting; it does not independently verify a project's price or ownership.
+
+The cart says **Continue on itch.io** and explains that payment and downloads are managed there.
+RougeChain sign-in is separate: no store account ID or email is attached to that link, and purchasing
+does not create a RougeChain account library entry. itch.io handles the buyer's purchase/download
+access. A completed purchase, receipt and post-purchase access test remains a separate verification
+step; the public listing and payment dialog checks do not establish that result.
+
+## 3B. Stripe checkout (optional alternative)
 
 1. **Create the Stripe account** for RougeChain Technologies and finish verification (business details, bank account). Stripe looks at the site during review. It expects to see:
    - what you sell and at what price (the site shows this)
@@ -91,7 +124,7 @@ The signup form says the address is only used for RougeChain releases. Set `priv
 - **On the site:** edit `PRODUCTS` at the top of `public/store.js`. `was` and `now` are in cents. Early Access currently sets both to `2000` ($20.00), so every price box and the cart agree and no discount badge or crossed-out price appears. Only add a comparison price when it represents an actual offer.
 - **On Stripe:** add a new price to the product and make a new Payment Link for it. Stripe charges whatever its link says.
 
-Nothing in `store-config.js` is secret: Payment Links are meant to be public. Never put a Stripe secret key in this site.
+Nothing in `store-config.js` is secret: Payment Links and public paid-project pages are meant to be public. Never put a Stripe secret key or private download key in this site.
 
 ## Publish the free demo download
 
@@ -130,8 +163,9 @@ that source size, and the browser does not fetch or hash the ZIP. For a new vers
 version and source metadata together and verify the hosted build before enabling it. Archives
 belong on the download host, not in Netlify's `public/` directory or this Git repository.
 
-Only the **free demo** belongs in this public configuration. The paid Early Access build stays
-behind the delivery provider's purchase entitlement or download-key system described above.
+Only the **free demo** belongs in `downloads`. The public paid project page may be set separately
+in `checkout`; the paid Early Access files stay behind the delivery provider's purchase entitlement
+or download-key system described above.
 
 ## Storefront motion
 
@@ -172,6 +206,7 @@ While someone is signed in:
 - checkout adds `client_reference_id=<account id>` and `prefilled_email` to the Stripe Payment Link.
   In Stripe, each payment's Checkout Session shows the account id as its **client reference ID**,
   which is what a "My library" page can use later.
+- itch.io checkout receives neither value; purchases and downloads remain managed by itch.io.
 
 Signed in, the same button opens a short list (Email, Wallet, Password). Each row opens its own
 screen: add an email to a wallet account or a wallet to an email account (one tap, the wallet asks),

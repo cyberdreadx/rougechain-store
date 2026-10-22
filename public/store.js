@@ -1,6 +1,6 @@
 // RougeChain Store: the catalogue, prices, wishlist, cart and checkout, shared by every page.
 // store-config.js says what is on sale and how:
-//   a product with a Stripe Payment Link  ->  "Add to cart"; the cart's "Continue to payment" goes to Stripe
+//   a product with verified checkout     ->  "Add to cart"; payment opens the configured provider
 //   none, but an email signup is set      ->  "Get notified" opens the signup form
 //   neither (a preview)                   ->  "Add to cart"; the cart says checkout isn't open yet
 // The wishlist and the cart each open as a panel (a bottom sheet on phones, see app.css).
@@ -20,8 +20,28 @@
 
   function money(c) { return "$" + (c / 100).toFixed(2); }
   function off(p) { return Math.round((1 - p.now / p.was) * 100); }
-  function link(id) { return (S.checkout && S.checkout[id]) || ""; }
-  function mode(id) { return link(id) ? "buy" : S.signupAction ? "notify" : "preview"; }
+  function checkout(id) {
+    var raw = S.checkout && S.checkout[id];
+    // Existing Stripe Payment Link strings remain supported. Provider objects require
+    // an explicit release gate after the operator has checked the paid destination.
+    var entry = typeof raw === "string" ? { provider: "stripe", url: raw, published: true } : raw;
+    if (!entry || entry.published !== true || typeof entry.url !== "string") return null;
+    try {
+      var url = new URL(entry.url);
+      if (url.protocol !== "https:" || url.username || url.password || url.port) return null;
+      if (entry.provider === "stripe") {
+        if (url.hostname !== "buy.stripe.com" || !/^\/[a-z0-9_]+$/i.test(url.pathname)) return null;
+      } else if (entry.provider === "itch.io") {
+        // A stable creator/project page only: never a signed download, key or archive.
+        if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.itch\.io$/i.test(url.hostname) ||
+            !/^\/[a-z0-9][a-z0-9_-]*\/?$/i.test(url.pathname) || url.search || url.hash) return null;
+        var demo = S.downloads && S.downloads["gltch-runner-demo"];
+        if (demo && typeof demo.url === "string" && url.toString().replace(/\/$/, "") === demo.url.replace(/\/$/, "")) return null;
+      } else return null;
+      return { provider: entry.provider, url: url.toString() };
+    } catch (e) { return null; }
+  }
+  function mode(id) { return checkout(id) ? "buy" : S.signupAction ? "notify" : "preview"; }
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
   function read(key) {
@@ -169,27 +189,37 @@
     });
     cart.querySelector(".rc-sum").textContent = items.length ? money(sum) : "—";
     var pay = cart.querySelector(".rc-pay"), note = cart.querySelector(".rc-note");
-    var live = items.length > 0 && items.every(function (id) { return link(id); });
+    var live = items.length > 0 && items.every(function (id) { return checkout(id); });
+    pay.textContent = t("Continue to payment");
     if (!items.length) { pay.disabled = true; note.textContent = ""; }
     else if (!live) { pay.disabled = true; note.textContent = t("Checkout isn't open yet. Until it is, keep things on your wishlist."); }
     else if (items.length > 1) { pay.disabled = true; note.textContent = t("For now, buy one item at a time."); }
-    else { pay.disabled = false; var pays = t("You pay on Stripe's secure checkout page."), saved = t("The purchase is saved to your store account."); note.textContent = pays + (window.RC && window.RC.account ? gap(pays, saved) + saved : ""); }
+    else {
+      pay.disabled = false;
+      if (checkout(items[0]).provider === "itch.io") {
+        pay.textContent = t("Continue on itch.io");
+        note.textContent = t("You pay and download on itch.io. Your purchase is managed there.");
+      } else note.textContent = t("You pay on Stripe's secure checkout page.");
+    }
   }
   function openCart(from) { paintCart(); open(cart, from); }
   // Signed in: Stripe gets the account id (it shows as the payment's client reference ID) and the email.
   function payUrl(id) {
-    var url = link(id), who = window.RC && window.RC.account;
-    if (!url || !who) return url;
+    var target = checkout(id), who = window.RC && window.RC.account;
+    if (!target) return "";
+    // Store sign-in is separate from itch.io. Do not forward personal/account data.
+    if (target.provider !== "stripe" || !who) return target.url;
     try {
-      var u = new URL(url);
-      u.searchParams.set("client_reference_id", who.id);
+      var u = new URL(target.url);
+      if (who.id) u.searchParams.set("client_reference_id", who.id);
       if (who.email) u.searchParams.set("prefilled_email", who.email);
       return u.toString();
-    } catch (e) { return url; }
+    } catch (e) { return ""; }
   }
   cart.querySelector(".rc-pay").addEventListener("click", function () {
     var items = read("rc-cart");
-    if (items.length === 1 && link(items[0])) window.location.href = payUrl(items[0]);
+    var destination = items.length === 1 ? payUrl(items[0]) : "";
+    if (destination) window.location.href = destination;
   });
 
   // ---- the wishlist
