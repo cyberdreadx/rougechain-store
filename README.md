@@ -133,31 +133,31 @@ The free demo has its own delivery setting, independent of paid checkout:
 
 ```js
 {
-  published: false,
+  published: true,
   provider: "itch.io",
-  url: "https://cyberdreadx.itch.io/gltch-runner-demo-v01",
-  version: "0.2.0-demo.5",
+  url: "https://cyberdreadx.itch.io/gltch-runner-demo",
+  version: "0.2.0-demo.11",
   sourceArchive: {
-    filename: "GltchRunnerDemo-0.2.0-demo.5-Windows.zip",
-    bytes: 3853682434,
-    sha256: "39f086cffab5f21ab6777c9bcb3e9d9bdbda1c3d77c4de3bfd0e301294c1903d"
+    filename: "GltchRunnerDemo-0.2.0-demo.11-Windows.zip",
+    bytes: 3790112961,
+    sha256: "d8e7f09df54c756bd9e665e58e5c82da75afa3313729160d742ed0adf6d7f940"
   }
 }
 ```
 
-Upload the verified archive with Butler to `cyberdreadx/gltch-runner-demo-v01:windows-demo` with
-`--userversion 0.2.0-demo.5`. After the upload, verify the channel's version and downloaded build
+Upload the verified build folder with Butler to `cyberdreadx/gltch-runner-demo:windows-demo` with
+`--userversion 0.2.0-demo.11`. After the upload, verify the channel's version and downloaded build
 contents, and confirm that a signed-out visitor can reach the public project page and download
 the demo for free. Only then set `published` to `true` and deploy the site. Until it is enabled,
 the download button stays disabled and its status says the download is being prepared.
 
 Keep the stable itch.io project URL instead of a temporary signed CDN download URL. The button
 says **Download free demo on itch.io** and shows the version/provider. Its HTTPS URL must have an
-`itch.io` or `*.itch.io` hostname; credentials in a URL are rejected. The `-v01` project slug is
-the existing delivery destination, not the build's version.
+`itch.io` or `*.itch.io` hostname; credentials in a URL are rejected. The canonical project slug is independent of the build version; the older
+`gltch-runner-demo-v01` URL redirects to it.
 
-`sourceArchive` describes the original 3.85 GB ZIP given to Butler. Butler uploads its contents,
-and itch.io generates its own download archives and patches. The original ZIP's size and SHA-256
+`sourceArchive` describes the corresponding local 3.79 GB ZIP. Butler uploads the verified build
+folder, and itch.io generates its own download archives and patches. The original ZIP's size and SHA-256
 are source provenance, not a claim about itch.io's generated download. The page does not display
 that source size, and the browser does not fetch or hash the ZIP. For a new version, update the
 version and source metadata together and verify the hosted build before enabling it. Archives
