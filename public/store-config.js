@@ -22,13 +22,13 @@ window.STORE = {
       published: true,
       provider: "itch.io",
       url: "https://cyberdreadx.itch.io/gltch-runner-demo-v01",
-      version: "0.2.0-demo.5",
-      // Provenance of the ZIP supplied to Butler. itch.io repackages its contents;
+      version: "0.2.0-demo.10",
+      // Verified local release archive. itch.io repackages the uploaded files;
       // these are not the size/checksum of itch.io's generated downloads.
       sourceArchive: {
-        filename: "GltchRunnerDemo-0.2.0-demo.5-Windows.zip",
-        bytes: 3853682434,
-        sha256: "39f086cffab5f21ab6777c9bcb3e9d9bdbda1c3d77c4de3bfd0e301294c1903d"
+        filename: "GltchRunnerDemo-0.2.0-demo.10-Windows.zip",
+        bytes: 3790084688,
+        sha256: "3a91ab9336ce8dea76667407786f7ae0b68eeb031bc69a6114361cce948a82ff"
       }
     }
   },

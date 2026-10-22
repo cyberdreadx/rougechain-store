@@ -98,17 +98,26 @@ h1.title { margin: 0; font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); lett
 
 /* ---------- hero: media + capsule ---------- */
 .hero { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; margin-top: 16px; background: linear-gradient(180deg, rgba(14, 19, 31, .9), rgba(14, 19, 31, .55)); border: 1px solid var(--line); padding: 14px; }
-.media { min-width: 0; display: grid; gap: 10px; }
+.media { min-width: 0; display: grid; gap: 10px; align-content: start; }
 .stage { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: #000; overflow: hidden; }
 .stage img { width: 100%; height: 100%; object-fit: cover; transition: opacity .25s ease; }
+.stage [hidden], .video-meta[hidden] { display: none !important; }
+.stage-video { position: absolute; inset: 0; }
+.stage-video iframe { width: 100%; height: 100%; border: 0; display: block; }
+.stage-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: grid; justify-items: center; gap: 10px; width: max-content; max-width: 70%; padding: 16px 22px; border: 1px solid var(--cyan); background: rgba(6, 8, 14, .88); cursor: pointer; box-shadow: 0 0 30px rgba(56, 225, 255, .16); font: 700 16px/1.2 var(--ui); text-align: center; }
+.stage-play:hover { background: #152536; border-color: #fff; }
+.stage-play span { color: var(--cyan); font-size: 32px; line-height: 1; }
+.video-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px 16px; font: 600 14px/1.4 var(--ui); color: var(--muted); }
+.video-meta a { text-decoration: underline; text-underline-offset: 3px; }
 .stage .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 14px 10px; background: linear-gradient(transparent, rgba(0, 0, 0, .75)); font: 600 15px/1.2 var(--ui); letter-spacing: .05em; }
 .stage .tag { position: absolute; left: 10px; top: 10px; font: 400 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; background: var(--shade); border: 1px solid var(--line); padding: 5px 7px; color: var(--cyan); }
 .stage .arrow { position: absolute; top: 50%; translate: 0 -50%; width: 40px; height: 64px; border: 0; background: rgba(0, 0, 0, .35); cursor: pointer; font: 400 26px/1 var(--mono); color: var(--text); opacity: .7; }
 .stage .arrow:hover { opacity: 1; background: rgba(0, 0, 0, .6); }
 .stage .prev { left: 0; } .stage .next { right: 0; }
 .strip { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-color: var(--line) transparent; }
-.thumb { flex: 0 0 auto; width: 116px; aspect-ratio: 16 / 9; padding: 0; border: 2px solid transparent; background: #000; cursor: pointer; opacity: .62; transition: opacity .15s, border-color .15s; }
+.thumb { position: relative; flex: 0 0 auto; width: 116px; aspect-ratio: 16 / 9; padding: 0; border: 2px solid transparent; background: #000; cursor: pointer; opacity: .62; transition: opacity .15s, border-color .15s; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb .play-mark { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 26px; background: rgba(0, 0, 0, .25); text-shadow: 0 2px 8px #000; }
 .thumb:hover { opacity: 1; }
 .thumb[aria-current="true"] { opacity: 1; border-color: var(--cyan); }
 .info { min-width: 0; display: grid; gap: 12px; align-content: start; }
@@ -353,16 +362,19 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
     <div class="studio">by <b>RougeChain Technologies</b></div>
   </div>
 
-  <section class="hero" aria-label="Screenshots and summary">
+  <section class="hero" aria-label="Gameplay video and screenshots">
     <div class="media">
       <div class="stage">
-        <img id="stage-img" src="img/kestrel-night.jpg" alt="">
-        <span class="tag" id="stage-tag">Story</span>
-        <div class="cap" id="stage-cap">Kestrel Block at half past nine, in the rain</div>
-        <button class="arrow prev" id="prev" type="button" aria-label="Previous screenshot">‹</button>
-        <button class="arrow next" id="next" type="button" aria-label="Next screenshot">›</button>
+        <img id="stage-img" src="https://i.ytimg.com/vi/h4ZAIWpPIEY/hqdefault.jpg" alt="Early Access story gameplay">
+        <div class="stage-video" id="stage-video" hidden></div>
+        <span class="tag" id="stage-tag">Gameplay video</span>
+        <div class="cap" id="stage-cap">Early Access story gameplay</div>
+        <button class="stage-play" id="stage-play" type="button" hidden><span aria-hidden="true">▶</span><strong>Play gameplay video</strong></button>
+        <button class="arrow prev" id="prev" type="button" aria-label="Previous media">‹</button>
+        <button class="arrow next" id="next" type="button" aria-label="Next media">›</button>
       </div>
-      <div class="strip" id="strip" role="list" aria-label="Screenshots"></div>
+      <div class="video-meta" id="video-meta"><span>Early Access story gameplay</span><a href="https://www.youtube.com/watch?v=h4ZAIWpPIEY" target="_blank" rel="noopener noreferrer">Watch on YouTube</a></div>
+      <div class="strip" id="strip" role="group" aria-label="Gameplay video and screenshots"></div>
     </div>
     <div class="info">
       <div class="capsule">
@@ -646,6 +658,7 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
 (function () {
   var tr = window.I18N ? window.I18N.t : function (s, v) { return v ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in v ? v[k] : m; }) : s; };
   var SHOTS = [
+    ["h4ZAIWpPIEY", "Gameplay video", "Early Access story gameplay", "video"],
     ["kestrel-night", "Story", "Kestrel Block at half past nine, in the rain"],
     ["neonrow-street", "Early Access only", "Neon Row: team deathmatch down a street canyon"],
     ["kestrel-sunset", "Story", "Sunset over the avenue"],
@@ -666,39 +679,75 @@ footer .wrap { padding-block: 18px 28px; font-size: 12.5px; color: var(--muted);
     ["WASP-32", "SMG"], ["BREAKER-7", "Shotgun"], ["RAIJIN-EM", "EM sniper rifle"], ["ARCCASTER", "Plasma rifle"]
   ];
 
-  // ---- the screenshots
+  // ---- gameplay video and screenshots; the player loads only after a click
+  var media = document.querySelector(".media");
   var strip = document.getElementById("strip");
   var img = document.getElementById("stage-img");
   var cap = document.getElementById("stage-cap");
   var tag = document.getElementById("stage-tag");
+  var video = document.getElementById("stage-video");
+  var play = document.getElementById("stage-play");
+  var videoMeta = document.getElementById("video-meta");
+  var prev = document.getElementById("prev");
+  var nextButton = document.getElementById("next");
   var at = 0;
   SHOTS.forEach(function (s, i) {
     var b = document.createElement("button");
-    b.className = "thumb"; b.type = "button"; b.setAttribute("role", "listitem");
+    b.className = "thumb"; b.type = "button";
     b.setAttribute("aria-label", tr(s[2]));
-    b.innerHTML = '<img src="img/' + s[0] + '-t.jpg" alt="">';
+    var thumbnail = document.createElement("img");
+    thumbnail.alt = ""; thumbnail.loading = "lazy";
+    thumbnail.src = s[3] === "video" ? "https://i.ytimg.com/vi/" + s[0] + "/hqdefault.jpg" : "img/" + s[0] + "-t.jpg";
+    b.appendChild(thumbnail);
+    if (s[3] === "video") {
+      var mark = document.createElement("span");
+      mark.className = "play-mark"; mark.textContent = "▶"; mark.setAttribute("aria-hidden", "true");
+      b.appendChild(mark);
+    }
     b.addEventListener("click", function () { show(i); });
     strip.appendChild(b);
   });
   function show(i) {
     at = (i + SHOTS.length) % SHOTS.length;
+    var requested = at;
     var s = SHOTS[at];
+    // Removing the iframe also stops its audio when a screenshot is selected.
+    video.replaceChildren(); video.hidden = true;
+    img.hidden = cap.hidden = tag.hidden = prev.hidden = nextButton.hidden = false;
+    play.hidden = videoMeta.hidden = s[3] !== "video";
     img.style.opacity = 0;
     var next = new Image();
-    next.onload = next.onerror = function () { img.src = next.src; img.alt = tr(s[2]); img.style.opacity = 1; };
-    next.src = "img/" + s[0] + ".jpg";
+    next.onload = next.onerror = function () {
+      if (requested !== at) return;
+      img.src = next.src; img.alt = tr(s[2]); img.style.opacity = 1;
+    };
+    next.src = s[3] === "video" ? "https://i.ytimg.com/vi/" + s[0] + "/hqdefault.jpg" : "img/" + s[0] + ".jpg";
     cap.textContent = tr(s[2]); tag.textContent = tr(s[1]);
     Array.prototype.forEach.call(strip.children, function (t, k) { t.setAttribute("aria-current", k === at ? "true" : "false"); });
     var t = strip.children[at];
-    if (t) { strip.scrollTo({ left: t.offsetLeft - strip.clientWidth / 2 + t.clientWidth / 2, behavior: "smooth" }); }
+    if (t) { strip.scrollTo({ left: t.offsetLeft - strip.offsetLeft - strip.clientWidth / 2 + t.clientWidth / 2, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
   }
-  document.getElementById("prev").addEventListener("click", function () { show(at - 1); });
-  document.getElementById("next").addEventListener("click", function () { show(at + 1); });
-  document.addEventListener("keydown", function (e) {
-    if (document.querySelector(".rc-panel:not([hidden])")) return;
+  play.addEventListener("click", function () {
+    if (SHOTS[at][3] !== "video" || video.firstChild) return;
+    var frame = document.createElement("iframe");
+    frame.title = tr("Early Access story gameplay");
+    frame.src = "https://www.youtube-nocookie.com/embed/" + SHOTS[at][0] + "?autoplay=1&rel=0&playsinline=1";
+    frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    frame.allowFullscreen = true;
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    video.appendChild(frame); video.hidden = false;
+    img.hidden = cap.hidden = tag.hidden = play.hidden = prev.hidden = nextButton.hidden = true;
+    frame.focus();
+  });
+  prev.addEventListener("click", function () { show(at - 1); });
+  nextButton.addEventListener("click", function () { show(at + 1); });
+  media.addEventListener("keydown", function (e) {
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
-    if (e.key === "ArrowLeft") show(at - 1);
-    if (e.key === "ArrowRight") show(at + 1);
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault(); show(at + (e.key === "ArrowLeft" ? -1 : 1));
+      strip.children[at].focus({ preventScroll: true });
+    }
   });
   show(0);
 
